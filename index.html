@@ -2819,7 +2819,7 @@ function makeMoji(cfg){
   var ink=document.createElement('canvas'),ictx=ink.getContext('2d');
   var strokes={},discs=[],selDisc=null,score=0,gameSet=[];
   var items=cfg.items,kanjiMode=!!cfg.strokeData,strokePaths=[],strokeSets=[],strokeIndex=0,lastAction=Date.now(),startHint=0;
-  var strokeReady=false,strokeEndSeen=false,retryHint=0,autoAdvanceToken=0,strokeSpark=null;
+  var strokeReady=false,strokeEndSeen=false,retryHint=0,autoAdvanceToken=0,strokeSpark=null,completionTapAt=0;
   var meaningCard=null,meaningTitle=null,meaningSentence=null,completionBtn=kanjiMode?$('#'+cfg.next):null;
   var mapBtn=kanjiMode?$('#kj-map'):null,mapOverlay=null,mapGrid=null,clearedKanji={};
   if(kanjiMode){try{clearedKanji=JSON.parse(localStorage.getItem('asobi-kanji-cleared-v1')||'{}')||{};}catch(ex){clearedKanji={};}}
@@ -3015,6 +3015,12 @@ function makeMoji(cfg){
     if(tab==='trace')drawTrace();
     speakItem();
   }
+  function activateCompletion(e){
+    if(e){e.preventDefault();e.stopPropagation();}
+    if(!kanjiMode||!completionBtn||!doneFlag||tab!=='trace')return;
+    var now=Date.now();if(now-completionTapAt<500)return;completionTapAt=now;
+    nav(1);
+  }
   /* --- おとしてポン --- */
   var MAXDISC=80;
   function newGameSet(){
@@ -3174,7 +3180,11 @@ function makeMoji(cfg){
   $('#'+cfg.tabT).addEventListener('click',function(){sfx('click'); setTab('trace');});
   $('#'+cfg.tabG).addEventListener('click',function(){sfx('click'); discs=[]; selDisc=null; newGameSet(); setTab('game');});
   $('#'+cfg.prev).addEventListener('click',function(){nav(-1);});
-  $('#'+cfg.next).addEventListener('click',function(){nav(1);});
+  if(kanjiMode){
+    completionBtn.addEventListener('pointerup',activateCompletion,false);
+    completionBtn.addEventListener('touchend',activateCompletion,false);
+    completionBtn.addEventListener('click',activateCompletion,false);
+  }else $('#'+cfg.next).addEventListener('click',function(){nav(1);});
   $('#'+cfg.say).addEventListener('click',function(){sfx('click'); speakItem();});
   return {
     enter:function(){resize();updateMeaning();syncCompletionCTA();},

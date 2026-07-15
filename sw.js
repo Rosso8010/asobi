@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v24';
+var CACHE = 'asobi-v25';
 var ASSETS = [
   './',
   './index.html',
