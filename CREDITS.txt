@@ -15,3 +15,24 @@ rush-animals.webp / rush-objects-a.webp / rush-objects-b.webp /
 rush-props.webp も、ミニゲームラッシュ専用に制作した
 オリジナル素材です。表示時に絵が切れないよう、rush-art/ 内へ
 1点ずつ余白付きで切り出した素材をアプリでは使用しています。
+rush-world-candy.webp / rush-world-space.webp と、rush-art/ 内の
+key / chest / drum / bell / crown / wand は、ラッシュの追加世界と
+成功演出用に OpenAI の画像生成機能で制作したオリジナル素材です。
+piano-stage-art.webp / kanji-studio-art.webp は、ピアノステージと
+かんじ練習画面のために OpenAI の画像生成機能で制作した
+オリジナル背景です。
+かんじの書き順データについて
+==============================
+かんじモードの画線・筆順データには KanjiVG を使用しています。
+KanjiVG copyright © Ulrich Apel and contributors.
+Creative Commons Attribution-Share Alike 3.0 License.
+https://kanjivg.tagaini.net/
+https://creativecommons.org/licenses/by-sa/3.0/
+
+ピアノ課題曲について
+==================
+「エリーゼのために」「トルコ行進曲」などのガイドは、
+パブリックドメインの楽譜を参照し、2オクターブで子どもが
+遊びやすい長さ・音域へ編曲しています。
+Mutopia Project: https://www.ibiblio.org/mutopia/
+IMSLP: https://imslp.org/

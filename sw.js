@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v18';
+var CACHE = 'asobi-v24';
 var ASSETS = [
   './',
   './index.html',
@@ -12,7 +12,11 @@ var ASSETS = [
   './mode-motion.webp',
   './mode-learning.webp',
   './mode-creative.webp',
+  './piano-stage-art.webp',
+  './kanji-studio-art.webp',
   './rush-world.webp',
+  './rush-world-candy.webp',
+  './rush-world-space.webp',
   './rush-animals.webp',
   './rush-objects-a.webp',
   './rush-objects-b.webp',
@@ -32,6 +36,7 @@ var ASSETS = [
   './rush-art/candle.webp',
   './rush-art/car.webp',
   './rush-art/cat.webp',
+  './rush-art/chest.webp',
   './rush-art/chick.webp',
   './rush-art/child.webp',
   './rush-art/cow.webp',
@@ -54,6 +59,11 @@ var ASSETS = [
   './rush-art/sprout.webp',
   './rush-art/star.webp',
   './rush-art/umbrella.webp',
+  './rush-art/key.webp',
+  './rush-art/drum.webp',
+  './rush-art/bell.webp',
+  './rush-art/crown.webp',
+  './rush-art/wand.webp',
   './audio/playlist.json',
   './audio/きらきら星.mp3',
   './audio/エリーゼのために.mp3',
