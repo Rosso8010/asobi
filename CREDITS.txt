@@ -21,9 +21,11 @@ key / chest / drum / bell / crown / wand は、ラッシュの追加世界と
 piano-stage-art.webp / kanji-studio-art.webp は、ピアノステージと
 かんじ練習画面のために OpenAI の画像生成機能で制作した
 オリジナル背景です。
-かんじの書き順データについて
-==============================
-かんじモードの画線・筆順データには KanjiVG を使用しています。
+文字の書き順データについて
+==========================
+かんじ・ひらがな・カタカナモードの画線・筆順データには
+KanjiVG を使用しています。アプリ内へパスデータを埋め込み、
+オフラインでも動作する形にしています。
 KanjiVG copyright © Ulrich Apel and contributors.
 Creative Commons Attribution-Share Alike 3.0 License.
 https://kanjivg.tagaini.net/
