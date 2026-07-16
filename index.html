@@ -502,6 +502,7 @@ button:focus{outline:4px solid rgba(255,193,7,.55);outline-offset:2px}
 @keyframes adv-go{50%{transform:scale(1.07)}}
 .adv-light small{display:block;color:#fff;font-size:24px;text-shadow:0 2px 0 rgba(0,0,0,.25)}
 .adv-count-stars{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:5px;width:min(480px,80%)}.adv-count-stars img{width:74px;height:74px;object-fit:contain;animation:adv-star-in .35s cubic-bezier(.2,1.5,.3,1) both}@keyframes adv-star-in{from{transform:scale(.1) rotate(-45deg);opacity:0}}
+.adv-memory-watch{width:100%;padding:9px 18px;border:3px solid #fff;border-radius:999px;background:linear-gradient(90deg,#fff6b7,#ffd9ef,#dff8ff);color:#563d7a;font-size:clamp(18px,2.5vw,25px);font-weight:900;box-shadow:0 5px 0 #bea6dd;animation:adv-memory-pulse 1.15s ease-in-out infinite}@keyframes adv-memory-pulse{50%{transform:scale(1.04);filter:brightness(1.07)}}
 .adv-finish-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;width:100%}.adv-rush{background:linear-gradient(#ff7eab,#ef3c83);color:#fff;box-shadow:0 8px 0 #ad2f66}
 .adv-calm .adv-panel,.adv-calm .adv-choice,.adv-calm .adv-start{box-shadow:0 5px 0 rgba(73,54,121,.18)}.adv-calm *{animation:none!important}.adv-calm .adv-panel:before{display:none}
 @media(max-width:800px){.adv-panel{min-height:0;height:95%;padding:12px;gap:8px}.adv-guide,.adv-guide.adv-art{width:92px;height:92px}.adv-game{min-height:220px}.adv-choice{min-width:105px;min-height:94px}.adv-choice img,.adv-choice .adv-art{width:74px;height:74px}.adv-light{width:150px;height:150px}.adv-lobby-cards{grid-template-columns:1fr 1fr}}
@@ -2997,19 +2998,26 @@ function makeMoji(cfg){
   }
   function buildPhraseGuide(){
     phraseCells=[];phraseActive=0;pts=[];nCov=0;
-    var raw=items[idx].ch.replace(/\s+/g,''),chars=Array.from?Array.from(raw):raw.split('');
-    var rows=chars.length>4&&W<900?2:1,cols=Math.ceil(chars.length/rows),gap=12,margin=22,top=78,bottom=18;
-    var slotW=(W-margin*2-gap*(cols-1))/cols,slotH=(H-top-bottom-gap*(rows-1))/rows;
-    var size=Math.max(82,Math.min(slotW,slotH)-4);
-    for(var ci=0;ci<chars.length;ci++){
-      var row=Math.floor(ci/cols),col=ci%cols,countInRow=Math.min(cols,chars.length-row*cols);
-      var rowWidth=countInRow*size+(countInRow-1)*gap;
+    var source=items[idx].ch.replace(/^\s+|\s+$/g,''),flat=source.replace(/\s+/g,''),chars=Array.from?Array.from(flat):flat.split('');
+    var splitName=(cfg.screen==='hiragana'||cfg.screen==='katakana')&&/\s/.test(source),rowChars=[],gap=12,margin=22,top=78,bottom=18;
+    if(splitName){
+      var words=source.split(/\s+/);for(var wi=0;wi<words.length;wi++)rowChars.push(Array.from?Array.from(words[wi]):words[wi].split(''));
+    }else{
+      var normalRows=chars.length>4&&W<900?2:1,normalCols=Math.ceil(chars.length/normalRows);
+      for(var nri=0;nri<normalRows;nri++)rowChars.push(chars.slice(nri*normalCols,Math.min(chars.length,(nri+1)*normalCols)));
+    }
+    var rows=rowChars.length,slotH=(H-top-bottom-gap*(rows-1))/rows,ci=0;
+    for(var row=0;row<rows;row++){
+      var countInRow=rowChars[row].length,slotW=(W-margin*2-gap*(countInRow-1))/countInRow;
+      var size=Math.max(82,Math.min(slotW,slotH)-4),rowWidth=countInRow*size+(countInRow-1)*gap;
+      for(var col=0;col<countInRow;col++,ci++){
       var rx=(W-rowWidth)/2+col*(size+gap),ry=top+row*(slotH+gap)+(slotH-size)/2;
       var off=document.createElement('canvas');off.width=200;off.height=200;var oc=off.getContext('2d');
-      oc.font='bold 150px sans-serif';oc.textAlign='center';oc.textBaseline='middle';oc.fillText(chars[ci],100,105);
+      oc.font='bold 150px sans-serif';oc.textAlign='center';oc.textBaseline='middle';oc.fillText(rowChars[row][col],100,105);
       var id=oc.getImageData(0,0,200,200).data,set=[];
       for(var y=4;y<200;y+=6)for(var x=4;x<200;x+=6)if(id[(y*200+x)*4+3]>120)set.push({x:rx+x/200*size,y:ry+y/200*size,on:false});
-      phraseCells.push({ch:chars[ci],x:rx,y:ry,s:size,pts:set,nCov:0,done:false});
+      phraseCells.push({ch:rowChars[row][col],x:rx,y:ry,s:size,pts:set,nCov:0,done:false});
+      }
     }
     pts=phraseCells.length?phraseCells[0].pts:[];lastAction=Date.now();
   }
@@ -3640,7 +3648,10 @@ var ADVENTURE=(function(){
   }
   function gameMemory(){
     var pool=shuffle(['dog','rabbit','butterfly','balloon','rocket','apple']),targets=pool.slice(0,2),found={};
-    base('🧺 まほうの おつかい','この 2つを おぼえてね','<div id="adv-game" class="adv-game">'+artImg(targets[0])+artImg(targets[1])+'</div>');sayGuide('ふたつを おぼえてね');
+    base('🧺 まほうの おつかい','よーく みて おぼえてね 👀','<div id="adv-game" class="adv-game">'+artImg(targets[0])+artImg(targets[1])+'<div id="adv-memory-watch" class="adv-memory-watch">ゆっくり みてね　● ● ●</div></div>');sayGuide('よーく みて、おぼえてね。ゆっくりで だいじょうぶ');
+    later(function(){var w=$('#adv-memory-watch');if(w)w.textContent='よーく みてね　● ● ○';},1500);
+    later(function(){var w=$('#adv-memory-watch');if(w)w.textContent='もうすこし みてね　● ○ ○';},2700);
+    later(function(){var w=$('#adv-memory-watch');if(w)w.textContent='おぼえたかな?　○ ○ ○';},3900);
     later(function(){
       var choices=shuffle(targets.concat(pool.slice(2,5))),h='';for(var i=0;i<choices.length;i++)h+='<button class="adv-choice" data-key="'+choices[i]+'">'+artImg(choices[i])+'</button>';
       $('#adv-instr').textContent='おぼえた 2つを えらぼう!';$('#adv-game').innerHTML=h;
@@ -3650,11 +3661,11 @@ var ADVENTURE=(function(){
         else{b.classList.add('hint');sfx('click');$('#adv-instr').textContent='だいじょうぶ。もういちど おもいだそう!';later(function(){b.classList.remove('hint');},650);}
       });});
       later(function(){if(locked)return;$$('#adv-game .adv-choice').forEach(function(b){if(targets.indexOf(b.getAttribute('data-key'))>=0&&!b.classList.contains('got'))b.classList.add('hint');});},4200);
-    },1550);
+    },4600);
   }
   function gameSwitch(){
     var data=[['dog','animal','ground'],['rabbit','animal','ground'],['butterfly','animal','sky'],['balloon','thing','sky'],['rocket','thing','sky'],['apple','thing','ground']],round=0,got={};
-    base('🔄 ルールチェンジ','まずは どうぶつを えらぼう','<div id="adv-game" class="adv-game"></div>');
+    base('🔄 ルールチェンジ','どうぶつを えらぼう','<div id="adv-game" class="adv-game"></div>');
     function draw(){var h='';for(var i=0;i<data.length;i++)h+='<button class="adv-choice" data-key="'+data[i][0]+'">'+artImg(data[i][0])+'</button>';$('#adv-game').innerHTML=h;got={};
       $$('#adv-game .adv-choice').forEach(function(b){b.addEventListener('click',function(){
         if(locked||b.classList.contains('got'))return;var k=b.getAttribute('data-key'),row=null;for(var j=0;j<data.length;j++)if(data[j][0]===k)row=data[j];var ok=round===0?row[1]==='animal':row[2]==='sky';
@@ -3662,7 +3673,7 @@ var ADVENTURE=(function(){
         else{sfx('click');b.classList.add('hint');$('#adv-instr').textContent=round===0?'どうぶつは どれかな?':'そらを とぶのは どれかな?';later(function(){b.classList.remove('hint');},550);}
       });});
     }
-    sayGuide('まずは どうぶつを えらぼう');draw();
+    sayGuide('どうぶつを えらぼう');draw();
   }
   function gameCount(){
     var n=2+Math.floor(Math.random()*5);
