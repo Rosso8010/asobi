@@ -1,0 +1,12 @@
+{
+  "name": "もふもふ大合戦",
+  "short_name": "もふ大合戦",
+  "description": "編成とタイミングで戦線を押し返すオリジナル・レーンバトル",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#1c1630",
+  "theme_color": "#2a2140",
+  "lang": "ja"
+}

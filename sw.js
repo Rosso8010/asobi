@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v32';
+var CACHE = 'asobi-v39-mofu-save-schema';
 var ASSETS = [
   './',
   './index.html',
@@ -24,6 +24,12 @@ var ASSETS = [
   './rush-success.png',
   './rush-paper.png',
   './rush-bin.png',
+  './mofu-wars/index.html',
+  './mofu-wars/battle-worlds.webp',
+  './mofu-wars/battle-worlds-2.webp',
+  './mofu-wars/mofu-new-heroes.webp',
+  './mofu-wars/manifest.webmanifest',
+  './mofu-wars/sw.js',
   './rush-art/apple.webp',
   './rush-art/baby-chick.webp',
   './rush-art/ball.webp',
