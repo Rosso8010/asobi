@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v39-mofu-save-schema';
+var CACHE = 'asobi-v40-brain-art-studio';
 var ASSETS = [
   './',
   './index.html',
@@ -14,6 +14,7 @@ var ASSETS = [
   './mode-creative.webp',
   './piano-stage-art.webp',
   './kanji-studio-art.webp',
+  './coloring-atlas-v1.png',
   './rush-world.webp',
   './rush-world-candy.webp',
   './rush-world-space.webp',
