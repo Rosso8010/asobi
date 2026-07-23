@@ -4551,7 +4551,7 @@ var RUSH=(function(){
 /* ================= ひらめきラボ: 規則・行列・空間認識 ================= */
 var BRAIN=(function(){
   var board=$('#brain-board'),choices=$('#brain-choices'),title=$('#brain-title'),instr=$('#brain-instr'),kindEl=$('#brain-kind'),starsEl=$('#brain-stars'),levelEl=$('#brain-level'),comboEl=$('#brain-combo'),progressEl=$('#brain-progress'),progressLabel=$('#brain-progress-label'),panel=board.parentElement,pop=$('#brain-pop');
-  var stars=0,round=0,combo=0,best=0,solved=0,busy=false,current='pattern',hintTimer=0,revealTimer=0,by={};
+  var stars=0,round=0,combo=0,best=0,solved=0,busy=false,current='pattern',explain='',hintTimer=0,revealTimer=0,by={};
   try{var oldStars=parseInt(localStorage.getItem('asobi-brain-stars-v1')||'0',10)||0,st=JSON.parse(localStorage.getItem('asobi-brain-v2')||'null');if(st){stars=st.stars||oldStars;combo=st.combo||0;best=st.best||0;solved=st.solved||0;by=st.by||{};}else stars=oldStars;}catch(e){}
   function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
   function level(){return Math.min(12,1+Math.floor(stars/6));}
@@ -4560,8 +4560,55 @@ var BRAIN=(function(){
   function button(label,ok,custom,aria){var b=document.createElement('button');b.className='brain-choice';b.setAttribute('data-ok',ok?'1':'0');if(aria)b.setAttribute('aria-label',aria);if(custom)b.appendChild(custom);else b.innerHTML=label;b.addEventListener('click',answer);choices.appendChild(b);}
   function clearTimers(){clearTimeout(hintTimer);clearTimeout(revealTimer);hintTimer=revealTimer=0;}
   function hint(){clearTimeout(hintTimer);hintTimer=setTimeout(function(){if(cur!=='brain'||busy)return;var h=choices.querySelector('[data-ok="1"]');if(h){h.classList.add('brain-hint');instr.textContent='💡 ひかっている ところを よーく みてみよう';}},6500);}
-  function header(k,t,ins){current=k;kindEl.textContent={pattern:'🔁 きまり',space:'🧊 くうかん',matrix:'🧩 へんしん',odd:'🧺 なかま',count:'🔢 かくれたかず',mirror:'🪞 かがみ',route:'🗺️ みち',memory:'✨ きおく',rotate:'🔄 かいてん',order:'📏 おおきさ',pair:'🤝 かんけい',shadow:'👤 かげ',symmetry:'🦋 たいしょう',balance:'⚖️ おきかえ',topview:'👀 うえから',sudoku:'🔲 ろんり'}[k];title.textContent=t;instr.textContent=ins;}
-  function answer(e){if(busy)return;clearTimers();var b=e.currentTarget;if(b.getAttribute('data-ok')==='1'){busy=true;combo++;best=Math.max(best,combo);stars++;solved++;by[current]=(by[current]||0)+1;var milestone=solved%5===0;if(milestone)stars+=2;save();sfx('yay');var r=b.getBoundingClientRect();CONF.burst(r.left+r.width/2,r.top+r.height/2,milestone?120:70);CONF.rain(milestone?['🌈','💡','⭐','✨']:['✨','⭐','💡'],milestone?25:12);panel.classList.remove('brain-win');void panel.offsetWidth;panel.classList.add('brain-win');pop.textContent=milestone?'おおはっけん!':['ピカーン!','みえた!','ひらめいた!','さすが!'][round%4];pop.classList.remove('go');void pop.offsetWidth;pop.classList.add('go');title.textContent=milestone?'はっけんカプセル かんせい!':['きまりを はっけん!','くうかんマスター!','すごい! みえたね!','あたまが キラキラ!'][round%4];instr.textContent=milestone?'ボーナスの おほしさまを 2こ みつけたよ!':'ゆっくり かんがえたから みつかったね!';if(milestone)speak('おおはっけん! すごい!','ja-JP',1);setTimeout(function(){busy=false;round++;newQ();},milestone?1450:1050);}else{sfx('tak');b.classList.remove('soft-no');void b.offsetWidth;b.classList.add('soft-no');combo=Math.max(0,combo-1);save();instr.textContent=['おしい! ちがうところを もういちど みよう','だいじょうぶ。ゆっくり みつけよう','べつの きまりが かくれているかも!'][round%3];hint();}}
+  function header(k,t,ins){
+    current=k;
+    kindEl.textContent={pattern:'🔁 きまり',space:'🧊 くうかん',matrix:'🧩 へんしん',odd:'🧺 なかま',count:'🔢 かくれたかず',mirror:'🪞 かがみ',route:'🗺️ みち',memory:'✨ きおく',rotate:'🔄 かいてん',order:'📏 おおきさ',pair:'🤝 かんけい',shadow:'👤 かげ',symmetry:'🦋 たいしょう',balance:'⚖️ おきかえ',topview:'👀 うえから',sudoku:'🔲 ろんり'}[k];
+    explain={
+      pattern:'同じ じゅんばんが くりかえしているから、つぎは この かたちだね。',
+      space:'むきを かえても、ブロックの つながりかたは おなじだよ。',
+      matrix:'よこで いろ、たてで かたちが かわるから、りょうほうを あわせるよ。',
+      odd:'ほかの 3つは おなじ なかまで、これだけ しゅるいが ちがうね。',
+      count:'うえだけでなく、その したの ブロックも 1こずつ かぞえるよ。',
+      mirror:'かがみでは、ひだりと みぎが はんたいに なるよ。',
+      route:'まんなかから、やじるしを 1つずつ じゅんばんに すすんだ ばしょだよ。',
+      memory:'かくれる まえの ならびを、ひだりから じゅんばんに おもいだしたね。',
+      rotate:'やじるしを まわす ほうへ、1つぶん うごかすよ。',
+      order:'りょうはしの ちょうど あいだの おおきさを えらぶよ。',
+      pair:'つかう ばしょや はたらきが つながっている ペアだね。',
+      shadow:'いろを なくして りんかくだけ みると、おなじ かたちだよ。',
+      symmetry:'まんなかで おると、ひだりと みぎの てんが ぴったり かさなるよ。',
+      balance:'うえの ルールと おなじ かずに おきかえると、おなじ おもさに なるよ。',
+      topview:'まうえからは たかさが かさなって、ゆかに ある ばしょだけが みえるよ。',
+      sudoku:'たてと よこに、おなじ ものが かさならないように えらぶよ。'
+    }[k]||'どこが おなじか、ゆっくり みると わかるね。';
+    title.textContent=t;instr.textContent=ins;
+  }
+  function answer(e){
+    if(busy)return;
+    clearTimers();
+    var b=e.currentTarget;
+    if(b.getAttribute('data-ok')==='1'){
+      busy=true;combo++;best=Math.max(best,combo);stars++;solved++;by[current]=(by[current]||0)+1;
+      var milestone=solved%5===0;
+      if(milestone)stars+=2;
+      save();sfx('yay');
+      var r=b.getBoundingClientRect();
+      CONF.burst(r.left+r.width/2,r.top+r.height/2,milestone?120:70);
+      CONF.rain(milestone?['🌈','💡','⭐','✨']:['✨','⭐','💡'],milestone?25:12);
+      panel.classList.remove('brain-win');void panel.offsetWidth;panel.classList.add('brain-win');
+      pop.textContent=milestone?'おおはっけん!':['ピカーン!','みえた!','ひらめいた!','さすが!'][round%4];
+      pop.classList.remove('go');void pop.offsetWidth;pop.classList.add('go');
+      title.textContent=milestone?'はっけんカプセル かんせい!':['きまりを はっけん!','くうかんマスター!','すごい! みえたね!','あたまが キラキラ!'][round%4];
+      instr.textContent='💡 '+explain+(milestone?'　⭐ボーナスも みつけたよ!':'');
+      speak('せいかい。'+explain,'ja-JP',.98);
+      setTimeout(function(){busy=false;round++;newQ();},milestone?2400:2050);
+    }else{
+      sfx('tak');b.classList.remove('soft-no');void b.offsetWidth;b.classList.add('soft-no');
+      combo=Math.max(0,combo-1);save();
+      instr.textContent=['おしい! ちがうところを もういちど みよう','だいじょうぶ。ゆっくり みつけよう','べつの きまりが かくれているかも!'][round%3];
+      hint();
+    }
+  }
   function pattern(){header('pattern','つぎは どれ?','ならびの きまりを みつけよう!');var sets=[
     [{s:'●',c:'#ff718e'},{s:'▲',c:'#5fccea'}],[{s:'★',c:'#ffd34d'},{s:'◆',c:'#8b71e8'},{s:'◆',c:'#8b71e8'}],[{s:'🌱',c:'#c9f3c5'},{s:'🌷',c:'#ffd0df'},{s:'🌳',c:'#b7e5c2'}],[{s:'■',c:'#ff8f70'},{s:'■',c:'#ff8f70'},{s:'●',c:'#65caef'}],[{s:'☀',c:'#ffe064'},{s:'☁',c:'#d8e9f4'},{s:'☂',c:'#8b80dc'}]
   ],base=sets[(round+level())%sets.length],seq=[],n=level()<3?5:level()<7?6:7;for(var i=0;i<n;i++)seq.push(base[i%base.length]);var ans=base[n%base.length],pool=shuf([{v:ans,ok:1},{v:{s:'■',c:'#ffad55'}},{v:{s:'●',c:'#77d99a'}},{v:{s:'▲',c:'#9d78eb'}}]);board.innerHTML='<div class="brain-seq">'+seq.map(token).join('')+'<span class="brain-token q">?</span></div>';choices.innerHTML='';pool.forEach(function(o){button(token(o.v,0),!!o.ok);});}
@@ -4584,7 +4631,33 @@ var BRAIN=(function(){
   function symmetry(){header('symmetry','はんぶんに おると ぴったりは?','ひだりと みぎが おなじ もようを さがそう');var good=[1,0,0,1,0,1,1,0,1,1,1,1,0,1,1,0],bad1=good.slice(),bad2=good.slice(),bad3=good.slice();bad1[1]=1;bad2[12]=1;bad3[4]=1;board.innerHTML='<div class="brain-sym-wrap"><span style="font-size:100px">🦋</span><i class="brain-sym-line"></i><span style="font-size:52px;font-weight:900;color:#6b55a1">?</span></div>';choices.innerHTML='';shuf([{a:good,ok:1},{a:bad1},{a:bad2},{a:bad3}]).forEach(function(o){button('',!!o.ok,symGrid(o.a,true),'もよう');});}
   function balance(){header('balance','おなじ おもさに なるのは?','うえの おきかえルールを つかおう');var sets=[{a:'🍎',n:2,b:'🍊'},{a:'⭐',n:3,b:'🌙'},{a:'🐟',n:2,b:'🐙'},{a:'🍓',n:3,b:'🍰'}],q=sets[round%sets.length],ans=new Array(q.n+1).join(q.a),wrong1=q.a,wrong2=new Array(q.n+2).join(q.a),wrong3=new Array(q.n+1).join(q.a==='⭐'?'🍎':'⭐');board.innerHTML='<div class="brain-balance"><div class="brain-balance-row">'+ans+' ＝ '+q.b+'</div><div>'+q.b+' ＝ ？</div></div>';choices.innerHTML='';shuf([ans,wrong1,wrong2,wrong3].filter(function(v,i,a){return a.indexOf(v)===i;})).forEach(function(v){button(v,v===ans);});}
   function topGrid(cells,small){var g=document.createElement('div');g.className='brain-top-grid'+(small?' small':'');for(var i=0;i<9;i++){var q=document.createElement('i'),x=i%3,z=Math.floor(i/3);if(cells.some(function(p){return p[0]===x&&p[1]===z;}))q.className='on';g.appendChild(q);}return g;}
-  function topView(){header('topview','まうえから みると どれ?','たかさではなく ゆかの ばしょを みよう');var forms=[{a:[[0,0,0],[1,0,0],[0,0,1],[0,1,0]],t:[[0,0],[1,0],[0,1]]},{a:[[0,0,0],[1,0,0],[2,0,0],[1,0,1],[1,1,1]],t:[[0,0],[1,0],[2,0],[1,1]]},{a:[[0,0,0],[0,1,0],[1,0,0],[1,0,1],[2,0,1]],t:[[0,0],[1,0],[1,1],[2,1]]}],f=forms[round%forms.length],cands=[f.t,[[0,0],[1,0],[2,0]],[[0,0],[0,1],[1,1]],[[0,0],[1,0],[1,1],[2,0],[2,1]]];board.innerHTML='';board.appendChild(cubeCanvas(f.a,round%3,true));choices.innerHTML='';shuf(cands).forEach(function(v,i){button('',v===f.t,topGrid(v,true),'うえからみたかたち');});}
+  function topFootprint(arr,rot){
+    var out=[],minX=99,minZ=99;
+    for(var i=0;i<arr.length;i++){
+      var x=arr[i][0],z=arr[i][2];
+      for(var r=0;r<rot;r++){var t=x;x=z;z=-t;}
+      var exists=false;
+      for(var j=0;j<out.length;j++)if(out[j][0]===x&&out[j][1]===z){exists=true;break;}
+      if(!exists){out.push([x,z]);minX=Math.min(minX,x);minZ=Math.min(minZ,z);}
+    }
+    for(i=0;i<out.length;i++){out[i][0]-=minX;out[i][1]-=minZ;}
+    out.sort(function(a,b){return a[1]-b[1]||a[0]-b[0];});
+    return out;
+  }
+  function topKey(a){return a.map(function(p){return p[0]+','+p[1];}).join('|');}
+  function topView(){
+    header('topview','まうえから みると どれ?','たかさではなく ゆかの ばしょを みよう');
+    var forms=[
+      [[0,0,0],[1,0,0],[0,0,1],[0,1,0]],
+      [[0,0,0],[1,0,0],[2,0,0],[1,0,1],[1,1,1]],
+      [[0,0,0],[0,1,0],[1,0,0],[1,0,1],[2,0,1]]
+    ],f=forms[round%forms.length],rot=round%3,ans=topFootprint(f,rot);
+    var pool=[[[0,0],[1,0],[2,0]],[[0,0],[0,1],[1,1]],[[0,0],[1,0],[1,1],[2,0],[2,1]],[[0,0],[1,0],[0,1],[1,1]],[[0,0],[1,0],[2,0],[0,1]]];
+    var cands=[{a:ans,ok:1}],used={};used[topKey(ans)]=1;
+    shuf(pool).forEach(function(v){var k=topKey(v);if(cands.length<4&&!used[k]){used[k]=1;cands.push({a:v,ok:0});}});
+    board.innerHTML='';board.appendChild(cubeCanvas(f,rot,true));choices.innerHTML='';
+    shuf(cands).forEach(function(o){button('',!!o.ok,topGrid(o.a,true),'うえからみたかたち');});
+  }
   function sudoku(){header('sudoku','？に はいるのは どれ?','たてにも よこにも 3つを 1こずつ ならべよう');var sets=[['●','▲','■'],['🌙','⭐','☀'],['🐶','🐱','🐰']],s=sets[round%sets.length],vals=[s[0],s[1],s[2],s[1],s[2],s[0],s[2],s[0],null],ans=s[1],html='<div class="brain-sudoku">';for(var i=0;i<9;i++)html+='<span class="'+(vals[i]===null?'q':'')+'">'+(vals[i]===null?'?':vals[i])+'</span>';board.innerHTML=html+'</div>';choices.innerHTML='';var extra=round%2?'◆':'♥';shuf([s[0],s[1],s[2],extra]).forEach(function(v){button(v,v===ans);});}
   var games=[pattern,space,matrix,odd,countCubes,mirror,route,memory,rotateQ,orderSize,relationPair,shadowMatch,symmetry,balance,topView,sudoku];
   function newQ(){clearTimers();busy=false;panel.classList.remove('brain-win');pop.classList.remove('go');board.innerHTML='';choices.innerHTML='';games[round%games.length]();save();if(current!=='memory')hint();}

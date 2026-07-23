@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v51-mofu-war-v11';
+var CACHE = 'asobi-v53-lab-mofu-v13';
 var ASSETS = [
   './',
   './index.html',
@@ -28,6 +28,8 @@ var ASSETS = [
   './mofu-wars/index.html',
   './mofu-wars/battle-worlds.webp',
   './mofu-wars/battle-worlds-2.webp',
+  './mofu-wars/battle-impact-v12.webp',
+  './mofu-wars/battle-bases-v13.webp',
   './mofu-wars/mofu-new-heroes.webp',
   './mofu-wars/mofu-war-v5-hero.webp',
   './mofu-wars/mofu-base-v5.webp',
