@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v72-quality9-learning-results';
+var CACHE = 'asobi-v73-quality10-android-brain';
 var ASSETS = [
   './',
   './index.html',
