@@ -1005,6 +1005,7 @@ body.calm .toolbar-scroll-cue,body.calm .ui-tap-star{animation:none!important}
     <span class="ttl">🎤 うたスタジオ</span>
     <span class="spacer"></span>
     <button id="uta-export-album" class="actbtn">📦 アルバムを 外へ</button>
+    <button id="uta-clear-album" class="actbtn">🗑 アルバムを からに</button>
   </div>
   <div class="uta-body">
     <div class="uta-sec uta-rec-sec">
@@ -1054,7 +1055,7 @@ body.calm .toolbar-scroll-cue,body.calm .ui-tap-star{animation:none!important}
       <div id="set-data-status" class="settings-data-status">端末内の記録は、アプリを消すと失われる場合があります。</div>
     </div>
     <div class="settings-actions"><button id="set-update" class="actbtn">🔄 更新を確認</button><button id="settings-close" class="quizbtn">できた</button></div>
-    <div id="settings-status" class="settings-foot">あそびのくに 2026.07.24-quality15</div>
+    <div id="settings-status" class="settings-foot">あそびのくに 2026.07.25-quality16</div>
   </div>
 </div>
 <div id="app-update" class="app-update" role="status"><strong>✨ あたらしい「あそびのくに」が じゅんびできたよ</strong><button id="app-update-now">いま きりかえる</button></div>
@@ -1095,7 +1096,7 @@ function rr(ctx,x,y,w,h,r){ // rounded rect path (Safari15 has no ctx.roundRect)
 }
 
 /* ================= global comfort settings ================= */
-var APP_VERSION='2026.07.24-quality15';
+var APP_VERSION='2026.07.25-quality16';
 var PREF={sound:true,speech:true,calm:false};
 try{
   var savedPref=JSON.parse(localStorage.getItem('asobi-settings-v1')||'null');
@@ -2809,7 +2810,7 @@ var OE=(function(){
 
 /* ================= うたスタジオ ================= */
 var UT=(function(){
-  var rec=null,stream=null,chunks=[],recT0=0,timer=null,takes=[],sel=-1,playing=null,songPlaying=null,takeNo=1,analyser=null,meterSource=null,meterRAF=0,activeFxBtn=null,recRequest=0,requesting=false,albumLoaded=false,albumLoading=false;
+  var rec=null,stream=null,chunks=[],recT0=0,timer=null,takes=[],sel=-1,playing=null,songPlaying=null,takeNo=1,analyser=null,meterSource=null,meterRAF=0,activeFxBtn=null,recRequest=0,requesting=false,albumLoaded=false,albumLoading=false,albumClearAt=0,albumClearTimer=0;
   var recBtn=$('#rec-btn'),stateEl=$('#rec-state'),timeEl=$('#rec-time'),meterCv=$('#uta-meter'),meterCtx=meterCv.getContext('2d'),nowEl=$('#uta-now');
   var FXS=[
     {emo:'😊',lbl:'ふつう',rate:1},
@@ -2844,7 +2845,53 @@ var UT=(function(){
       renderTakes();if(rows.length)stateEl.textContent='📁 アルバムから '+rows.length+'こ よみこんだよ';
     }).catch(function(){albumLoading=false;stateEl.textContent='アルバムを よみこめなかったよ';});
   }
-  function deleteFromAlbum(id){if(!id)return;openAlbum().then(function(db){db.transaction('recordings','readwrite').objectStore('recordings').delete(id);}).catch(function(){});}
+  function deleteFromAlbum(id){
+    if(!id)return Promise.resolve();
+    return openAlbum().then(function(db){
+      return new Promise(function(resolve,reject){
+        var tx=db.transaction('recordings','readwrite');
+        tx.oncomplete=function(){resolve();};
+        tx.onerror=function(){reject(tx.error||new Error('delete failed'));};
+        tx.objectStore('recordings').delete(id);
+      });
+    });
+  }
+  function clearAlbumStore(){
+    return openAlbum().then(function(db){
+      return new Promise(function(resolve,reject){
+        var tx=db.transaction('recordings','readwrite');
+        tx.oncomplete=function(){resolve();};
+        tx.onerror=function(){reject(tx.error||new Error('clear failed'));};
+        tx.objectStore('recordings').clear();
+      });
+    });
+  }
+  function resetAlbumClearButton(){
+    var b=$('#uta-clear-album');
+    albumClearAt=0;clearTimeout(albumClearTimer);albumClearTimer=0;
+    if(b){b.textContent='🗑 アルバムを からに';b.classList.remove('confirm');}
+  }
+  function clearAlbum(){
+    var b=$('#uta-clear-album'),saved=takes.filter(function(t){return !!t.savedId;});
+    if(!saved.length){resetAlbumClearButton();stateEl.textContent='📁 アルバムは もう からっぽだよ';sfx('tak');return;}
+    var now=Date.now();
+    if(!albumClearAt||now-albumClearAt>=2500){
+      albumClearAt=now;b.textContent='もういちど おして';b.classList.add('confirm');
+      stateEl.textContent='ぜんぶ けすなら、もういちど おしてね';
+      sfx('tak');
+      albumClearTimer=setTimeout(function(){if(albumClearAt===now)resetAlbumClearButton();},2500);
+      return;
+    }
+    b.disabled=true;stateEl.textContent='🗑 アルバムを からにしているよ…';
+    clearAlbumStore().then(function(){
+      stopTake();
+      saved.forEach(function(t){if(t.url)URL.revokeObjectURL(t.url);});
+      takes=takes.filter(function(t){return !t.savedId;});
+      sel=-1;renderTakes();stateEl.textContent='📁 アルバムを からっぽにしたよ';sfx('pop');
+    }).catch(function(){
+      stateEl.textContent='アルバムを けせなかったよ。もういちど ためしてね';
+    }).then(function(){b.disabled=false;resetAlbumClearButton();});
+  }
   var crcTable=null;
   function crc32(bytes){
     if(!crcTable){crcTable=[];for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1);crcTable[n]=c>>>0;}}
@@ -3028,8 +3075,22 @@ var UT=(function(){
       });
       var saveB=document.createElement('button');saveB.className='take-save'+(t.savedId?' saved':'');saveB.textContent=t.savedId?'📁 ほぞんずみ':'📁 アルバム';saveB.disabled=!!t.savedId;saveB.setAttribute('aria-label',t.name+(t.savedId?'は アルバムに ほぞんずみ':'を アプリの アルバムに ほぞん'));
       saveB.addEventListener('click',function(){saveTake(t);});
-      var del=document.createElement('button');del.className='take-delete';del.textContent='×';del.setAttribute('aria-label',t.name+'をけす');
-      del.addEventListener('click',function(){var now=Date.now(),at=parseInt(del.dataset.confirmAt||'0',10);if(at&&now-at<2500){stopTake();if(t.savedId)deleteFromAlbum(t.savedId);URL.revokeObjectURL(t.url);takes.splice(i,1);if(sel===i)sel=-1;else if(sel>i)sel--;renderTakes();stateEl.textContent=t.savedId?'アルバムから けしたよ':'テイクを けしたよ';sfx('pop');return;}del.dataset.confirmAt=''+now;del.textContent='もういちど';del.classList.add('confirm');sfx('tak');setTimeout(function(){if(parseInt(del.dataset.confirmAt||'0',10)===now){del.dataset.confirmAt='0';del.textContent='×';del.classList.remove('confirm');}},2500);});
+      var del=document.createElement('button'),delDefault=t.savedId?'🗑':'×';del.className='take-delete';del.textContent=delDefault;del.setAttribute('aria-label',t.name+(t.savedId?'を アルバムから けす':'をけす'));
+      del.addEventListener('click',function(){
+        var now=Date.now(),at=parseInt(del.dataset.confirmAt||'0',10);
+        if(at&&now-at<2500){
+          var savedId=t.savedId;
+          del.disabled=true;stateEl.textContent=savedId?'アルバムから けしているよ…':'テイクを けしているよ…';
+          deleteFromAlbum(savedId).then(function(){
+            stopTake();URL.revokeObjectURL(t.url);
+            var pos=takes.indexOf(t);if(pos>=0){takes.splice(pos,1);if(sel===pos)sel=-1;else if(sel>pos)sel--;}
+            renderTakes();stateEl.textContent=savedId?'🗑 アルバムから けしたよ':'テイクを けしたよ';sfx('pop');
+          }).catch(function(){del.disabled=false;del.dataset.confirmAt='0';del.textContent=delDefault;del.classList.remove('confirm');stateEl.textContent='けせなかったよ。もういちど ためしてね';});
+          return;
+        }
+        del.dataset.confirmAt=''+now;del.textContent='もういちど';del.classList.add('confirm');sfx('tak');
+        setTimeout(function(){if(parseInt(del.dataset.confirmAt||'0',10)===now){del.dataset.confirmAt='0';del.textContent=delDefault;del.classList.remove('confirm');}},2500);
+      });
       wrap.appendChild(b);wrap.appendChild(saveB);wrap.appendChild(del);box.appendChild(wrap);
     });
   }
@@ -3135,6 +3196,7 @@ var UT=(function(){
     }
   }).catch(function(){});
   $('#uta-export-album').addEventListener('click',exportAlbum);
+  $('#uta-clear-album').addEventListener('click',clearAlbum);
   function enter(){drawMeter(true);loadAlbum();}
   function leave(){recRequest++;requesting=false;recBtn.disabled=false;setSongRecVolume(false);if(rec)stopRec();else stopMeter();stopAll();}
   return {enter:enter,leave:leave,stopAll:stopAll,dbg:function(){return{takes:takes.length,recording:!!rec,song:!!songPlaying};}};
