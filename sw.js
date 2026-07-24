@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v53-lab-mofu-v13';
+var CACHE = 'asobi-v72-quality9-learning-results';
 var ASSETS = [
   './',
   './index.html',
@@ -8,6 +8,8 @@ var ASSETS = [
   './icon-192.png',
   './icon-512.png',
   './home-world.webp',
+  './home-mode-icons-v1.png',
+  './koro-toy-parts-v1.png',
   './mode-math.webp',
   './mode-motion.webp',
   './mode-learning.webp',
@@ -25,6 +27,7 @@ var ASSETS = [
   './rush-success.png',
   './rush-paper.png',
   './rush-bin.png',
+  './mofu-wars/',
   './mofu-wars/index.html',
   './mofu-wars/battle-worlds.webp',
   './mofu-wars/battle-worlds-2.webp',
@@ -81,6 +84,19 @@ var ASSETS = [
   './mofu-wars/mofu-sprite-koala.webp',
   './mofu-wars/mofu-sprite-shika.webp',
   './mofu-wars/mofu-sprite-hamu.webp',
+  './mofu-wars/mofu-sprite-kani.webp',
+  './mofu-wars/mofu-sprite-obake.webp',
+  './mofu-wars/mofu-sprite-karasu.webp',
+  './mofu-wars/mofu-sprite-dokuro.webp',
+  './mofu-wars/mofu-sprite-gaki.webp',
+  './mofu-wars/mofu-sprite-drill.webp',
+  './mofu-wars/mofu-sprite-haguru.webp',
+  './mofu-wars/mofu-sprite-batto.webp',
+  './mofu-wars/mofu-sprite-shell.webp',
+  './mofu-wars/mofu-sprite-moon.webp',
+  './mofu-wars/mofu-sprite-coral.webp',
+  './mofu-wars/mofu-sprite-jelly.webp',
+  './mofu-wars/mofu-sprite-abyss.webp',
   './mofu-wars/manifest.webmanifest',
   './mofu-wars/sw.js',
   './rush-art/apple.webp',

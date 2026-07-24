@@ -5,13 +5,18 @@ audio/ フォルダ内の音源はご家庭で用意したファイルです。
 曲を増やすときは mp3 を audio/ に入れて、audio/playlist.json に
 ファイル名(拡張子なし)を追記してください。
 
-背景アートについて
-==================
+背景・UIアートについて
+======================
 home-world.webp / mode-math.webp / mode-motion.webp /
 mode-learning.webp / mode-creative.webp は、このアプリ専用に
 OpenAI の画像生成機能で制作したオリジナル背景です。
-rush-world.webp / rush-success.png / rush-paper.png / rush-bin.png / 
-rush-animals.webp / rush-objects-a.webp / rush-objects-b.webp / 
+home-mode-icons-v1.png は、トップ画面の14モードを同じ画風で
+見分けられるように制作したオリジナルのアイコンセットです。
+koro-toy-parts-v1.png は、コロコロコースのボール・坂・ファン・
+ワープ・ゴールなどを「おもちゃ工房」の画風で統一するために
+制作したオリジナルの部品セットです。
+rush-world.webp / rush-success.png / rush-paper.png / rush-bin.png /
+rush-animals.webp / rush-objects-a.webp / rush-objects-b.webp /
 rush-props.webp も、ミニゲームラッシュ専用に制作した
 オリジナル素材です。表示時に絵が切れないよう、rush-art/ 内へ
 1点ずつ余白付きで切り出した素材をアプリでは使用しています。
@@ -21,6 +26,7 @@ key / chest / drum / bell / crown / wand は、ラッシュの追加世界と
 piano-stage-art.webp / kanji-studio-art.webp は、ピアノステージと
 かんじ練習画面のために OpenAI の画像生成機能で制作した
 オリジナル背景です。
+
 文字の書き順データについて
 ==========================
 かんじ・ひらがな・カタカナモードの画線・筆順データには
