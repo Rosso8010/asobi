@@ -1032,7 +1032,7 @@ body.calm .toolbar-scroll-cue,body.calm .ui-tap-star{animation:none!important}
       <div id="set-data-status" class="settings-data-status">端末内の記録は、アプリを消すと失われる場合があります。</div>
     </div>
     <div class="settings-actions"><button id="set-update" class="actbtn">🔄 更新を確認</button><button id="settings-close" class="quizbtn">できた</button></div>
-    <div id="settings-status" class="settings-foot">あそびのくに Quality 9</div>
+    <div id="settings-status" class="settings-foot">あそびのくに 2026.07.24-quality12</div>
   </div>
 </div>
 <div id="app-update" class="app-update" role="status"><strong>✨ あたらしい「あそびのくに」が じゅんびできたよ</strong><button id="app-update-now">いま きりかえる</button></div>
@@ -1073,7 +1073,7 @@ function rr(ctx,x,y,w,h,r){ // rounded rect path (Safari15 has no ctx.roundRect)
 }
 
 /* ================= global comfort settings ================= */
-var APP_VERSION='2026.07.24-quality11';
+var APP_VERSION='2026.07.24-quality12';
 var PREF={sound:true,speech:true,calm:false};
 try{
   var savedPref=JSON.parse(localStorage.getItem('asobi-settings-v1')||'null');
@@ -1342,6 +1342,12 @@ var PWA=(function(){
     var online=navigator.onLine!==false,text=online?'オフラインじゅんび OK':'Wi-Fiなしで あそんでるよ';net.classList.toggle('offline',!online);net.textContent='● '+text;net.setAttribute('aria-label',text);net.title=text;
   }
   function ready(){toast.classList.add('show');$('#settings-status').textContent='あそびのくに '+APP_VERSION+' ／ 新しい更新の準備ができました。';}
+  function switchNow(){
+    if(reloading)return;
+    reloading=true;
+    try{sessionStorage.setItem('asobi-last-auto-update',APP_VERSION);}catch(e){}
+    location.reload();
+  }
   function watch(r){
     reg=r;if(r.waiting&&navigator.serviceWorker.controller)ready();
     r.addEventListener('updatefound',function(){var w=r.installing;if(!w)return;w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)ready();});});
@@ -1351,9 +1357,14 @@ var PWA=(function(){
     if(!('serviceWorker' in navigator)||location.protocol!=='https:'){st.textContent='あそびのくに '+APP_VERSION+' ／ この開き方では自動更新を使いません。';return;}
     navigator.serviceWorker.getRegistration().then(function(r){if(!r){st.textContent='Wi-Fiにつないで公開版を一度開いてください。';return;}watch(r);return r.update().then(function(){setTimeout(function(){if(!toast.classList.contains('show'))st.textContent='あそびのくに '+APP_VERSION+' ／ 最新です。';},700);});}).catch(function(){st.textContent='確認できませんでした。Wi-Fi接続を確認してください。';});
   }
-  reloadBtn.addEventListener('click',function(){reloading=true;location.reload();});
+  reloadBtn.addEventListener('click',switchNow);
   window.addEventListener('online',network);window.addEventListener('offline',network);network();
-  if('serviceWorker' in navigator){navigator.serviceWorker.addEventListener('controllerchange',function(){if(reloading)return;if(hadController)ready();else hadController=true;});}
+  if('serviceWorker' in navigator){navigator.serviceWorker.addEventListener('controllerchange',function(){
+    if(reloading)return;
+    if(!hadController){hadController=true;return;}
+    if(navigator.onLine!==false&&$('#scr-home').classList.contains('active')){setTimeout(switchNow,250);}
+    else ready();
+  });}
   return{check:check,watch:watch,network:network};
 })();
 $('#set-update').addEventListener('click',PWA.check);
@@ -5717,7 +5728,10 @@ window.addEventListener('orientationchange',function(){syncAppViewport();setTime
 // オフライン対応 (HTTPSで開いたときだけ Service Worker を登録)
 if('serviceWorker' in navigator && location.protocol==='https:'){
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('./sw.js').then(function(reg){PWA.watch(reg);}).catch(function(){});
+    navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(function(reg){
+      PWA.watch(reg);
+      reg.update().catch(function(){});
+    }).catch(function(){});
   });
 }
 HOME.enter();

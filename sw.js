@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v74-quality11-flat-koro-3d-models';
+var CACHE = 'asobi-v75-quality12-fresh-navigation';
 var ASSETS = [
   './',
   './index.html',
@@ -167,6 +167,26 @@ self.addEventListener('activate', function (e) {
 });
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
+  var url = new URL(e.request.url);
+  var isPage = e.request.mode === 'navigate' ||
+    e.request.destination === 'document' ||
+    /\/index\.html$/.test(url.pathname);
+  if (isPage) {
+    e.respondWith(
+      fetch(e.request, { cache: 'no-store' }).then(function (res) {
+        if (res && res.ok) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { c.put('./index.html', copy); });
+        }
+        return res;
+      }).catch(function () {
+        return caches.match('./index.html').then(function (r) {
+          return r || caches.match('./');
+        });
+      })
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then(function (r) {
       if (r) return r;
