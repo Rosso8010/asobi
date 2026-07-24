@@ -869,8 +869,8 @@ body.calm .toolbar-scroll-cue,body.calm .ui-tap-star{animation:none!important}
   </div>
   <div class="art-layout">
     <div class="art-side">
-      <button class="d3-chip sel" data-shape="sphere">🔮 たま</button><button class="d3-chip" data-shape="cube">🧊 しかく</button><button class="d3-chip" data-shape="cylinder">🥫 つつ</button><button class="d3-chip" data-shape="cone">🚧 さんかく</button><button class="d3-chip" data-shape="donut">🍩 ドーナツ</button><button class="d3-chip" data-shape="ufo">🛸 UFO</button><button class="d3-chip" data-shape="apple">🍎 りんご</button><button class="d3-chip" data-shape="monster">🦖 かいじゅう</button><button class="d3-chip" data-shape="planet">🪐 わくせい</button><button class="d3-chip" data-shape="cake">🎂 ケーキ</button><button class="d3-chip" data-shape="fish">🐡 さかな</button><button class="d3-chip" data-shape="robot">🤖 ロボ</button><button class="d3-chip" data-shape="egg">🥚 たまご</button><button class="d3-chip" data-shape="pumpkin">🎃 かぼちゃ</button><button class="d3-chip" data-shape="chest">🧰 たからばこ</button><button class="d3-chip" data-shape="moon">🌙 おつきさま</button><button class="d3-chip" data-shape="rocket">🚀 ロケット</button><button class="d3-chip" data-shape="flower">🌼 おはな</button><button class="d3-chip" data-shape="cloud">☁️ くも</button><button class="d3-chip" data-shape="turtle">🐢 かめ</button>
-      <div id="d3-palette" class="art-palette"></div><div class="d3-status">☝️ 1ぽんゆび：かく<br>✌️ 2ほんゆび：まわす<br>📷 けしきに かさねられるよ</div>
+      <button class="d3-chip sel" data-shape="sphere">🔮 たま</button><button class="d3-chip" data-shape="cube">🧊 はこ</button><button class="d3-chip" data-shape="cylinder">🥫 つつ</button><button class="d3-chip" data-shape="cone">🔺 とんがり</button><button class="d3-chip" data-shape="donut">🍩 ドーナツ</button><button class="d3-chip" data-shape="egg">🥚 たまご</button>
+      <div id="d3-palette" class="art-palette"></div><div class="d3-status">☝️ りったいの おもてに かく<br>✌️ 2ほんゆびで まわす<br>🎨 うらがわにも つづけて かけるよ</div>
     </div>
     <div id="d3-box" class="art-canvasbox d3-stage"><video id="d3-video" playsinline muted></video><canvas id="d3-cv"></canvas><div class="art-hint">1ぽんで かく・2ほんで くるくる!</div></div>
   </div>
@@ -1054,7 +1054,7 @@ body.calm .toolbar-scroll-cue,body.calm .ui-tap-star{animation:none!important}
       <div id="set-data-status" class="settings-data-status">端末内の記録は、アプリを消すと失われる場合があります。</div>
     </div>
     <div class="settings-actions"><button id="set-update" class="actbtn">🔄 更新を確認</button><button id="settings-close" class="quizbtn">できた</button></div>
-    <div id="settings-status" class="settings-foot">あそびのくに 2026.07.24-quality14</div>
+    <div id="settings-status" class="settings-foot">あそびのくに 2026.07.24-quality15</div>
   </div>
 </div>
 <div id="app-update" class="app-update" role="status"><strong>✨ あたらしい「あそびのくに」が じゅんびできたよ</strong><button id="app-update-now">いま きりかえる</button></div>
@@ -1095,7 +1095,7 @@ function rr(ctx,x,y,w,h,r){ // rounded rect path (Safari15 has no ctx.roundRect)
 }
 
 /* ================= global comfort settings ================= */
-var APP_VERSION='2026.07.24-quality14';
+var APP_VERSION='2026.07.24-quality15';
 var PREF={sound:true,speech:true,calm:false};
 try{
   var savedPref=JSON.parse(localStorage.getItem('asobi-settings-v1')||'null');
@@ -5669,7 +5669,7 @@ var COLORING=(function(){
 /* ================= 3Dおえかき / カメラ重ね合わせ ================= */
 var DRAW3D=(function(){
   var box=$('#d3-box'),cv=$('#d3-cv'),ctx=cv.getContext('2d'),video=$('#d3-video');
-  var W=0,H=0,d=1,yaw=.45,pitch=-.18,shape='sphere',color='#ff5985',size=9,strokes=[],drafts={sphere:strokes},active={},rotating=false,lastMid=null,stream=null,clearConfirm=0;
+  var W=0,H=0,d=1,yaw=.45,pitch=-.18,shape='sphere',color='#ff5985',size=9,strokes=[],drafts={sphere:strokes},active={},rotating=false,lastMid=null,stream=null,clearConfirm=0,renderRAF=0;
   var colors=['#ff5985','#ff9e3d','#ffe056','#54d38a','#39c5e6','#4e76e8','#9b65e8','#ffffff','#31354b'];
   var names={sphere:'たま',cube:'しかく',cylinder:'つつ',cone:'さんかく',donut:'ドーナツ',ufo:'UFO',apple:'りんご',monster:'かいじゅう',planet:'わくせい',cake:'ケーキ',fish:'さかな',robot:'ロボ',egg:'たまご',pumpkin:'かぼちゃ',chest:'たからばこ',moon:'おつきさま',rocket:'ロケット',flower:'おはな',cloud:'くも',turtle:'かめ'};
   var models={
@@ -5737,15 +5737,53 @@ var DRAW3D=(function(){
     }else ellipse(c,m,1,1,0);
     ctx.restore();
   }
-  function render(){if(!W)return;var c=center(),m=model();ctx.clearRect(0,0,W,H);if(!stream){var g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#171638');g.addColorStop(.55,'#343064');g.addColorStop(1,'#6b4d91');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,255,255,.08)';for(var bg=0;bg<12;bg++){ctx.beginPath();ctx.arc((bg*83+31)%Math.max(W,1),(bg*47+19)%Math.max(H,1),2+(bg%3),0,6.29);ctx.fill();}}drawModel(c,m);if(['sphere','planet','apple','egg','pumpkin'].indexOf(shape)>=0)mesh(c,m);for(var si=0;si<strokes.length;si++){var st=strokes[si];ctx.strokeStyle=st.c;ctx.lineWidth=st.w;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();var open=false;for(var pi=0;pi<st.p.length;pi++){var q=rot(st.p[pi]);if(q[2]>.02){var z=project(q,c,m);if(!open){ctx.moveTo(z.x,z.y);open=true;}else ctx.lineTo(z.x,z.y);}else open=false;}ctx.stroke();}}
+  var geomCache={},surfaceColors={sphere:'#a8ebff',cube:'#9ce8ff',cylinder:'#a9efd9',cone:'#ffe48a',donut:'#ffafd0',egg:'#fff4c4'};
+  function normal3(x,y,z){var l=Math.sqrt(x*x+y*y+z*z)||1;return[x/l,y/l,z/l];}
+  function vertex(x,y,z,nx,ny,nz){return{p:[x,y,z],n:normal3(nx,ny,nz)};}
+  function addTri(out,a,b,c){out.push([a,b,c]);}
+  function sphereGeom(egg){
+    var out=[],us=24,vs=12,sx=egg ? .7 : 1,sy=egg ? 1.06 : 1,sz=egg ? .7 : 1;
+    function at(u,v){var y=Math.sin(v),rad=Math.cos(v),wa=egg?(.92-.13*y):1,x=rad*Math.cos(u)*sx*wa,z=rad*Math.sin(u)*sz*wa,ny=y/sy,nn=normal3(x/(sx*sx),ny/(sy*sy),z/(sz*sz));return vertex(x,y*sy,z,nn[0],nn[1],nn[2]);}
+    for(var j=0;j<vs;j++)for(var i=0;i<us;i++){var u0=i/us*6.283,u1=(i+1)/us*6.283,v0=-1.571+j/vs*3.142,v1=-1.571+(j+1)/vs*3.142,a=at(u0,v0),b=at(u1,v0),c=at(u0,v1),d=at(u1,v1);addTri(out,a,b,d);addTri(out,a,d,c);}return out;
+  }
+  function cubeGeom(){
+    var o=[],s=.78;
+    function face(a,b,c,d,n){addTri(o,vertex(a[0],a[1],a[2],n[0],n[1],n[2]),vertex(b[0],b[1],b[2],n[0],n[1],n[2]),vertex(c[0],c[1],c[2],n[0],n[1],n[2]));addTri(o,vertex(a[0],a[1],a[2],n[0],n[1],n[2]),vertex(c[0],c[1],c[2],n[0],n[1],n[2]),vertex(d[0],d[1],d[2],n[0],n[1],n[2]));}
+    face([-s,-s,s],[s,-s,s],[s,s,s],[-s,s,s],[0,0,1]);face([s,-s,-s],[-s,-s,-s],[-s,s,-s],[s,s,-s],[0,0,-1]);face([s,-s,s],[s,-s,-s],[s,s,-s],[s,s,s],[1,0,0]);face([-s,-s,-s],[-s,-s,s],[-s,s,s],[-s,s,-s],[-1,0,0]);face([-s,s,s],[s,s,s],[s,s,-s],[-s,s,-s],[0,1,0]);face([-s,-s,-s],[s,-s,-s],[s,-s,s],[-s,-s,s],[0,-1,0]);return o;
+  }
+  function cylinderGeom(){
+    var o=[],us=24,ys=6,r=.72,lo=-.86,hi=.86;
+    function side(u,y){return vertex(Math.cos(u)*r,y,Math.sin(u)*r,Math.cos(u),0,Math.sin(u));}
+    for(var j=0;j<ys;j++)for(var i=0;i<us;i++){var u0=i/us*6.283,u1=(i+1)/us*6.283,y0=lo+(hi-lo)*j/ys,y1=lo+(hi-lo)*(j+1)/ys,a=side(u0,y0),b=side(u1,y0),c=side(u0,y1),d=side(u1,y1);addTri(o,a,b,d);addTri(o,a,d,c);}
+    for(i=0;i<us;i++){u0=i/us*6.283;u1=(i+1)/us*6.283;addTri(o,vertex(0,hi,0,0,1,0),vertex(Math.cos(u0)*r,hi,Math.sin(u0)*r,0,1,0),vertex(Math.cos(u1)*r,hi,Math.sin(u1)*r,0,1,0));addTri(o,vertex(0,lo,0,0,-1,0),vertex(Math.cos(u1)*r,lo,Math.sin(u1)*r,0,-1,0),vertex(Math.cos(u0)*r,lo,Math.sin(u0)*r,0,-1,0));}return o;
+  }
+  function coneGeom(){
+    var o=[],us=26,ys=10,r=.86,lo=-.86,hi=.93,h=hi-lo,slope=r/h;
+    function side(u,t){var rr=r*(1-t),n=normal3(Math.cos(u),slope,Math.sin(u));return vertex(Math.cos(u)*rr,lo+h*t,Math.sin(u)*rr,n[0],n[1],n[2]);}
+    for(var j=0;j<ys;j++)for(var i=0;i<us;i++){var u0=i/us*6.283,u1=(i+1)/us*6.283,t0=j/ys,t1=(j+1)/ys,a=side(u0,t0),b=side(u1,t0),c=side(u0,t1),d=side(u1,t1);addTri(o,a,b,d);addTri(o,a,d,c);}
+    for(i=0;i<us;i++){u0=i/us*6.283;u1=(i+1)/us*6.283;addTri(o,vertex(0,lo,0,0,-1,0),vertex(Math.cos(u1)*r,lo,Math.sin(u1)*r,0,-1,0),vertex(Math.cos(u0)*r,lo,Math.sin(u0)*r,0,-1,0));}return o;
+  }
+  function torusGeom(){
+    var o=[],us=28,vs=12,R=.62,r=.27;
+    function at(u,v){var cv=Math.cos(v),sv=Math.sin(v),cu=Math.cos(u),su=Math.sin(u);return vertex((R+r*cv)*cu,r*sv,(R+r*cv)*su,cv*cu,sv,cv*su);}
+    for(var j=0;j<vs;j++)for(var i=0;i<us;i++){var u0=i/us*6.283,u1=(i+1)/us*6.283,v0=j/vs*6.283,v1=(j+1)/vs*6.283,a=at(u0,v0),b=at(u1,v0),c=at(u0,v1),d=at(u1,v1);addTri(o,a,b,d);addTri(o,a,d,c);}return o;
+  }
+  function geometry(){if(geomCache[shape])return geomCache[shape];var g=shape==='cube'?cubeGeom():shape==='cylinder'?cylinderGeom():shape==='cone'?coneGeom():shape==='donut'?torusGeom():sphereGeom(shape==='egg');geomCache[shape]=g;return g;}
+  function shade(hex,k){var h=hex.replace('#',''),n=parseInt(h,16),r=(n>>16)&255,g=(n>>8)&255,b=n&255;r=Math.round(clamp(r*k,0,255));g=Math.round(clamp(g*k,0,255));b=Math.round(clamp(b*k,0,255));return'rgb('+r+','+g+','+b+')';}
+  function screenPoint(p,c){return{x:c.x+p[0]*c.r,y:c.y-p[1]*c.r,z:p[2]};}
+  function viewTriangle(t,c){
+    var a=rot(t[0].p),b=rot(t[1].p),d=rot(t[2].p),na=rot(t[0].n),nb=rot(t[1].n),nd=rot(t[2].n),nz=(na[2]+nb[2]+nd[2])/3;return{raw:t,p:[screenPoint(a,c),screenPoint(b,c),screenPoint(d,c)],n:[na,nb,nd],nz:nz,z:(a[2]+b[2]+d[2])/3};
+  }
+  function render(){if(!W)return;var c=center(),base=surfaceColors[shape]||'#b8ecff',views=geometry().map(function(t){return viewTriangle(t,c);}).filter(function(t){return t.nz>-.015;});ctx.clearRect(0,0,W,H);if(!stream){var g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#171638');g.addColorStop(.55,'#343064');g.addColorStop(1,'#6b4d91');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,255,255,.08)';for(var bg=0;bg<12;bg++){ctx.beginPath();ctx.arc((bg*83+31)%Math.max(W,1),(bg*47+19)%Math.max(H,1),2+(bg%3),0,6.29);ctx.fill();}}ctx.save();ctx.fillStyle='rgba(8,5,28,.28)';ctx.shadowColor='rgba(8,5,28,.46)';ctx.shadowBlur=14;ctx.beginPath();ctx.ellipse(c.x,c.y+c.r*.9,c.r*.72,c.r*.13,0,0,6.29);ctx.fill();ctx.restore();views.sort(function(a,b){return a.z-b.z;});ctx.save();for(var vi=0;vi<views.length;vi++){var t=views[vi],light=clamp(.68+t.nz*.28+(t.n[0][0]+t.n[1][0]+t.n[2][0])*.035,.48,1.12),fill=shade(base,light);ctx.fillStyle=fill;ctx.strokeStyle=fill;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(t.p[0].x,t.p[0].y);ctx.lineTo(t.p[1].x,t.p[1].y);ctx.lineTo(t.p[2].x,t.p[2].y);ctx.closePath();ctx.fill();ctx.stroke();}ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;for(vi=0;vi<views.length;vi+=Math.max(1,Math.floor(views.length/90))){t=views[vi];ctx.beginPath();ctx.moveTo(t.p[0].x,t.p[0].y);ctx.lineTo(t.p[1].x,t.p[1].y);ctx.lineTo(t.p[2].x,t.p[2].y);ctx.stroke();}ctx.restore();for(var si=0;si<strokes.length;si++){var st=strokes[si];ctx.strokeStyle=st.c;ctx.fillStyle=st.c;ctx.lineWidth=st.w;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();var open=false,first=null;for(var pi=0;pi<st.p.length;pi++){var sp=st.p[pi],q=rot([sp[0],sp[1],sp[2]]),nn=rot([sp[3],sp[4],sp[5]]),z=screenPoint(q,c);if(nn[2]>-.015){if(!open){ctx.moveTo(z.x,z.y);open=true;first=z;}else ctx.lineTo(z.x,z.y);}else open=false;}ctx.stroke();if(st.p.length===1&&first){ctx.beginPath();ctx.arc(first.x,first.y,st.w/2,0,6.29);ctx.fill();}}}
+  function queueRender(){if(stream||renderRAF)return;renderRAF=requestAnimationFrame(function(){renderRAF=0;render();});}
   function pos(e){var r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
-  function surface(p){var c=center(),m=model(),x=(p.x-c.x)/(c.r*m.rx),y=-(p.y-c.y-m.oy*c.r)/(c.r*m.ry),q=x*x+y*y,hit=q<=1;if(m.kind==='box'||m.kind==='cylinder')hit=Math.abs(x)<=1&&Math.abs(y)<=1;else if(m.kind==='cone')hit=y<=1&&y>=-.82&&Math.abs(x)<=Math.max(.05,(1-y)/1.82);else if(m.kind==='ring')hit=q<=1&&q>=.13;else if(m.kind==='disc')hit=q<=1;if(!hit)return null;return inv(x,y,Math.sqrt(Math.max(.02,1-Math.min(.98,q))));}
+  function surface(p){var c=center(),best=null,bestZ=-99,gs=geometry();for(var gi=0;gi<gs.length;gi++){var t=viewTriangle(gs[gi],c);if(t.nz<=-.02)continue;var a=t.p[0],b=t.p[1],d=t.p[2],den=(b.y-d.y)*(a.x-d.x)+(d.x-b.x)*(a.y-d.y);if(Math.abs(den)<.0001)continue;var w1=((b.y-d.y)*(p.x-d.x)+(d.x-b.x)*(p.y-d.y))/den,w2=((d.y-a.y)*(p.x-d.x)+(a.x-d.x)*(p.y-d.y))/den,w3=1-w1-w2;if(w1<-.002||w2<-.002||w3<-.002)continue;var zz=a.z*w1+b.z*w2+d.z*w3;if(zz<bestZ)continue;bestZ=zz;var va=t.raw[0],vb=t.raw[1],vd=t.raw[2],nx=va.n[0]*w1+vb.n[0]*w2+vd.n[0]*w3,ny=va.n[1]*w1+vb.n[1]*w2+vd.n[1]*w3,nz=va.n[2]*w1+vb.n[2]*w2+vd.n[2]*w3,nn=normal3(nx,ny,nz);best=[va.p[0]*w1+vb.p[0]*w2+vd.p[0]*w3,va.p[1]*w1+vb.p[1]*w2+vd.p[1]*w3,va.p[2]*w1+vb.p[2]*w2+vd.p[2]*w3,nn[0],nn[1],nn[2]];}return best;}
   cv.addEventListener('pointerdown',function(e){active[e.pointerId]=pos(e);var ids=Object.keys(active);if(ids.length>=2){rotating=true;lastMid={x:(active[ids[0]].x+active[ids[1]].x)/2,y:(active[ids[0]].y+active[ids[1]].y)/2};}else{var q=surface(active[e.pointerId]);if(q)strokes.push({c:color,w:size,p:[q]});}});
-  window.addEventListener('pointermove',function(e){if(cur!=='draw3d'||!active[e.pointerId])return;active[e.pointerId]=pos(e);var ids=Object.keys(active);if(ids.length>=2){var mid={x:(active[ids[0]].x+active[ids[1]].x)/2,y:(active[ids[0]].y+active[ids[1]].y)/2};if(lastMid){yaw+=(mid.x-lastMid.x)*.012;pitch=clamp(pitch+(mid.y-lastMid.y)*.01,-1.2,1.2);}lastMid=mid;render();}else if(!rotating&&strokes.length){var q=surface(active[e.pointerId]);if(q){strokes[strokes.length-1].p.push(q);render();}}});
+  window.addEventListener('pointermove',function(e){if(cur!=='draw3d'||!active[e.pointerId])return;active[e.pointerId]=pos(e);var ids=Object.keys(active);if(ids.length>=2){var mid={x:(active[ids[0]].x+active[ids[1]].x)/2,y:(active[ids[0]].y+active[ids[1]].y)/2};if(lastMid){yaw+=(mid.x-lastMid.x)*.012;pitch=clamp(pitch+(mid.y-lastMid.y)*.01,-1.2,1.2);}lastMid=mid;queueRender();}else if(!rotating&&strokes.length){var q=surface(active[e.pointerId]);if(q){strokes[strokes.length-1].p.push(q);queueRender();}}});
   function up(e){delete active[e.pointerId];if(Object.keys(active).length<2){rotating=Object.keys(active).length>0;lastMid=null;}if(!Object.keys(active).length)rotating=false;}window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
   var pal=$('#d3-palette');colors.forEach(function(c){var b=document.createElement('button');b.className='art-color';b.style.background=c;b.addEventListener('click',function(){color=c;sfx('click');});pal.appendChild(b);});$$('.d3-chip').forEach(function(b){b.addEventListener('click',function(){var next=b.dataset.shape;if(next===shape)return;drafts[shape]=strokes;shape=next;strokes=drafts[next]||[];drafts[next]=strokes;$$('.d3-chip').forEach(function(x){x.classList.toggle('sel',x===b);});box.querySelector('.art-hint').textContent=(names[next]||next)+'に かいてみよう!';sfx('pop');render();});});
   var d3Clear=$('#d3-clear');d3Clear.addEventListener('click',function(){var now=Date.now();if(now-clearConfirm<2500){strokes=[];drafts[shape]=strokes;clearConfirm=0;d3Clear.textContent='🧽 けす';sfx('pop');render();}else{clearConfirm=now;d3Clear.textContent='もういちど おして';sfx('tak');setTimeout(function(){if(Date.now()-clearConfirm>=2400){clearConfirm=0;d3Clear.textContent='🧽 けす';}},2500);}});
-  function stopAR(){if(stream){stream.getTracks().forEach(function(t){t.stop();});stream=null;}video.srcObject=null;video.classList.remove('on');box.classList.remove('ar');$('#d3-ar').textContent='📷 カメラに かさねる';render();}
+  function stopAR(){if(renderRAF){cancelAnimationFrame(renderRAF);renderRAF=0;}if(stream){stream.getTracks().forEach(function(t){t.stop();});stream=null;}video.srcObject=null;video.classList.remove('on');box.classList.remove('ar');$('#d3-ar').textContent='📷 カメラに かさねる';render();}
   $('#d3-ar').addEventListener('click',function(){if(stream){stopAR();return;}if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){speak('このブラウザでは カメラを つかえません','ja-JP',.9);return;}navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false}).then(function(s){stream=s;video.srcObject=s;video.play();video.classList.add('on');box.classList.add('ar');$('#d3-ar').textContent='📷 カメラをとじる';render();}).catch(function(){speak('カメラを つかうには きょかしてね','ja-JP',.9);});});
   $('#d3-save').addEventListener('click',function(){var out=document.createElement('canvas');out.width=cv.width;out.height=cv.height;var o=out.getContext('2d');if(stream)try{o.drawImage(video,0,0,out.width,out.height);}catch(e){}o.drawImage(cv,0,0);var data=out.toDataURL('image/jpeg',.9);ARTSAVE.add('3d',data,'3D '+(names[shape]||shape),{shape:shape,strokes:strokes,yaw:yaw,pitch:pitch}).then(function(){artSaved(box);sfx('yay');showSavedImage(data,false);}).catch(function(){artSaved(box,'ほぞん できなかったよ\nもういちど ためしてね');sfx('tak');});});
   return{enter:resize,resize:resize,leave:stopAR,tick:function(){if(stream)render();}};

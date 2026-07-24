@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v77-quality14-audio-album';
+var CACHE = 'asobi-v78-quality15-real-3d-paint';
 var ASSETS = [
   './',
   './index.html',
