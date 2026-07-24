@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v75-quality12-fresh-navigation';
+var CACHE = 'asobi-v76-quality13-canvas-audio-lab';
 var ASSETS = [
   './',
   './index.html',
