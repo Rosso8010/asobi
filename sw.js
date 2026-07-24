@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v73-quality10-android-brain';
+var CACHE = 'asobi-v74-quality11-flat-koro-3d-models';
 var ASSETS = [
   './',
   './index.html',
@@ -9,7 +9,6 @@ var ASSETS = [
   './icon-512.png',
   './home-world.webp',
   './home-mode-icons-v1.png',
-  './koro-toy-parts-v1.png',
   './mode-math.webp',
   './mode-motion.webp',
   './mode-learning.webp',

@@ -647,14 +647,11 @@ body.calm .songbtn.playing .song-disc,body.calm .uta-now .uta-eq,body.calm #rec-
 .toolbar-scroll-cue.show{display:block;animation:toolbar-cue 3.2s both}@keyframes toolbar-cue{0%{opacity:0;transform:translateX(18px)}12%,72%{opacity:1;transform:none}100%{opacity:0;transform:translateX(14px)}}
 .ui-tap-star{position:fixed;z-index:10020;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fff36a;box-shadow:15px 0 #ff75b5,-13px 6px #62dcff,4px -15px #fff;pointer-events:none;animation:ui-tap-star .48s ease-out both}@keyframes ui-tap-star{to{opacity:0;transform:scale(2.8) rotate(65deg)}}
 
-/* Koro Koro: generated toy-workshop art, while collision shapes stay exact */
-#kr-tools .ico.kr-sprite{width:42px;height:35px;display:block;margin:0 auto 2px;background-image:url('koro-toy-parts-v1.png');background-repeat:no-repeat;background-size:400% 400%;font-size:0;filter:drop-shadow(0 2px 1px rgba(59,48,80,.18))}
-.kr-spr-ball{background-position:0 0}.kr-spr-block{background-position:33.333% 0}.kr-spr-plank{background-position:66.666% 0}.kr-spr-rampL{background-position:100% 0}
-.kr-spr-rampR{background-position:0 33.333%}.kr-spr-tramp{background-position:33.333% 33.333%}.kr-spr-beltR{background-position:66.666% 33.333%}.kr-spr-beltL{background-position:100% 33.333%}
-.kr-spr-fan{background-position:0 66.666%}.kr-spr-warp{background-position:33.333% 66.666%}.kr-spr-goal{background-position:66.666% 66.666%}.kr-spr-erase{background-position:33.333% 100%}
-#kr-tools .tbtn{min-width:78px;min-height:72px;padding:5px 7px;border-radius:18px;font-size:11px;line-height:1.05}
-#kr-tools .tbtn.sel{transform:translateY(-3px);box-shadow:0 7px 0 #d49b25,0 10px 17px rgba(82,70,105,.2)}
-@media(max-height:500px) and (orientation:landscape){#kr-tools .tbtn{min-height:58px}.toolrow{padding-top:4px;padding-bottom:4px}#kr-tools .ico.kr-sprite{width:34px;height:28px}}
+/* Koro Koro stays deliberately flat 2D: no rendered toy sprites or pseudo-3D parts. */
+#kr-tools .ico{display:block;min-height:30px;margin:0 auto 2px;font-size:27px;line-height:30px;filter:none}
+#kr-tools .tbtn{min-width:76px;min-height:68px;padding:5px 7px;border-radius:16px;font-size:11px;line-height:1.05;background:linear-gradient(#fff,#eaf6ff);box-shadow:0 4px 0 #9db7cf}
+#kr-tools .tbtn.sel{transform:translateY(-2px);background:linear-gradient(#fff49e,#ffc64e);box-shadow:0 6px 0 #ce8a29}
+@media(max-height:500px) and (orientation:landscape){#kr-tools .tbtn{min-height:56px}.toolrow{padding-top:4px;padding-bottom:4px}#kr-tools .ico{min-height:24px;font-size:23px;line-height:24px}}
 body.calm .toolbar-scroll-cue,body.calm .ui-tap-star{animation:none!important}
 </style>
 
@@ -861,7 +858,7 @@ body.calm .toolbar-scroll-cue,body.calm .ui-tap-star{animation:none!important}
   </div>
   <div class="art-layout">
     <div class="art-side">
-      <button class="d3-chip sel" data-shape="sphere">🔮 たま</button><button class="d3-chip" data-shape="ufo">🛸 UFO</button><button class="d3-chip" data-shape="apple">🍎 りんご</button><button class="d3-chip" data-shape="monster">🦖 かいじゅう</button><button class="d3-chip" data-shape="planet">🪐 わくせい</button><button class="d3-chip" data-shape="cake">🎂 ケーキ</button><button class="d3-chip" data-shape="fish">🐡 さかな</button><button class="d3-chip" data-shape="robot">🤖 ロボ</button><button class="d3-chip" data-shape="egg">🥚 たまご</button><button class="d3-chip" data-shape="pumpkin">🎃 かぼちゃ</button><button class="d3-chip" data-shape="chest">🧰 たからばこ</button><button class="d3-chip" data-shape="moon">🌙 おつきさま</button><button class="d3-chip" data-shape="rocket">🚀 ロケット</button><button class="d3-chip" data-shape="flower">🌼 おはな</button><button class="d3-chip" data-shape="cloud">☁️ くも</button><button class="d3-chip" data-shape="turtle">🐢 かめ</button>
+      <button class="d3-chip sel" data-shape="sphere">🔮 たま</button><button class="d3-chip" data-shape="cube">🧊 しかく</button><button class="d3-chip" data-shape="cylinder">🥫 つつ</button><button class="d3-chip" data-shape="cone">🚧 さんかく</button><button class="d3-chip" data-shape="donut">🍩 ドーナツ</button><button class="d3-chip" data-shape="ufo">🛸 UFO</button><button class="d3-chip" data-shape="apple">🍎 りんご</button><button class="d3-chip" data-shape="monster">🦖 かいじゅう</button><button class="d3-chip" data-shape="planet">🪐 わくせい</button><button class="d3-chip" data-shape="cake">🎂 ケーキ</button><button class="d3-chip" data-shape="fish">🐡 さかな</button><button class="d3-chip" data-shape="robot">🤖 ロボ</button><button class="d3-chip" data-shape="egg">🥚 たまご</button><button class="d3-chip" data-shape="pumpkin">🎃 かぼちゃ</button><button class="d3-chip" data-shape="chest">🧰 たからばこ</button><button class="d3-chip" data-shape="moon">🌙 おつきさま</button><button class="d3-chip" data-shape="rocket">🚀 ロケット</button><button class="d3-chip" data-shape="flower">🌼 おはな</button><button class="d3-chip" data-shape="cloud">☁️ くも</button><button class="d3-chip" data-shape="turtle">🐢 かめ</button>
       <div id="d3-palette" class="art-palette"></div><div class="d3-status">☝️ 1ぽんゆび：かく<br>✌️ 2ほんゆび：まわす<br>📷 けしきに かさねられるよ</div>
     </div>
     <div id="d3-box" class="art-canvasbox d3-stage"><video id="d3-video" playsinline muted></video><canvas id="d3-cv"></canvas><div class="art-hint">1ぽんで かく・2ほんで くるくる!</div></div>
@@ -1076,7 +1073,7 @@ function rr(ctx,x,y,w,h,r){ // rounded rect path (Safari15 has no ctx.roundRect)
 }
 
 /* ================= global comfort settings ================= */
-var APP_VERSION='2026.07.24-quality10';
+var APP_VERSION='2026.07.24-quality11';
 var PREF={sound:true,speech:true,calm:false};
 try{
   var savedPref=JSON.parse(localStorage.getItem('asobi-settings-v1')||'null');
@@ -1871,9 +1868,6 @@ var KZ=(function(){
 var KR=(function(){
   var stage=$('#koro-stage'),cv=$('#koro-cv'),ctx=ctxOf();
   function ctxOf(){return $('#koro-cv').getContext('2d');}
-  var krToyArt=new Image(),krToyReady=false;
-  krToyArt.onload=function(){krToyReady=true;};
-  krToyArt.src='koro-toy-parts-v1.png';
   var TOOLS=[
     {id:'ball', ico:'⚽', lbl:'ボール'},
     {id:'block',ico:'🟧', lbl:'ブロック'},
@@ -2146,7 +2140,7 @@ var KR=(function(){
   TOOLS.forEach(function(t){
     var b=document.createElement('button');
     b.className='tbtn'+(t.id==='ball'?' sel':'');
-    b.innerHTML='<span class="ico kr-sprite kr-spr-'+t.id+'">'+t.ico+'</span>'+t.lbl;
+    b.innerHTML='<span class="ico">'+t.ico+'</span>'+t.lbl;
     b.addEventListener('click',function(){sfx('click'); setTool(t.id);});
     toolBtns[t.id]=b;
     tl.appendChild(b);
@@ -2437,55 +2431,8 @@ var KR=(function(){
     while(acc>st&&n<6){step(st); acc-=st; n++;}
     draw();
   }
-  function toyCell(n,x,y,w,h){
-    if(!krToyReady)return false;
-    var cw=krToyArt.naturalWidth/4,ch=krToyArt.naturalHeight/4;
-    var col=n%4,row=Math.floor(n/4);
-    ctx.drawImage(krToyArt,col*cw,row*ch,cw,ch,x,y,w,h);
-    return true;
-  }
-  function drawToyPart(p,d){
-    if(!krToyReady)return false;
-    if(p.t==='block')return toyCell(1,p.x-9,p.y-9,d.w+18,d.h+18);
-    if(p.t==='plank')return toyCell(2,p.x-10,p.y-14,d.w+20,d.h+28);
-    if(p.t==='rampL')return toyCell(3,p.x-10,p.y-10,d.w+20,d.h+20);
-    if(p.t==='rampR')return toyCell(4,p.x-10,p.y-10,d.w+20,d.h+20);
-    if(p.t==='tramp')return toyCell(5,p.x-10,p.y-38,d.w+20,d.h+48);
-    if(p.t==='beltR')return toyCell(6,p.x-8,p.y-18,d.w+16,d.h+36);
-    if(p.t==='beltL')return toyCell(7,p.x-8,p.y-18,d.w+16,d.h+36);
-    if(p.t==='fan')return toyCell(8,p.x-12,p.y-76,d.w+24,d.h+78);
-    if(p.t==='warp')return toyCell(9,p.x-9,p.y-9,d.w+18,d.h+18);
-    if(p.t==='goal')return toyCell(10,p.x-14,p.y-42,d.w+28,d.h+52);
-    if(p.t==='star')return toyCell(11,p.x-6,p.y-6,d.w+12,d.h+12);
-    return false;
-  }
   function drawPart(p){
     var d=dims(p.t);
-    if(drawToyPart(p,d)){
-      if(p.t==='beltR'||p.t==='beltL'){
-        var toyDir=p.t==='beltR'?1:-1,toyOff=((Date.now()/38)%24)*toyDir;
-        ctx.save();ctx.globalAlpha=.8;ctx.strokeStyle='#fff7b8';ctx.lineWidth=2.5;
-        for(var tb=18;tb<d.w-8;tb+=24){
-          var tx=p.x+((tb+toyOff)%(d.w-18)+(d.w-18))%(d.w-18)+9;
-          ctx.beginPath();ctx.moveTo(tx-4*toyDir,p.y+3);ctx.lineTo(tx+4*toyDir,p.y+d.h/2);ctx.lineTo(tx-4*toyDir,p.y+d.h-3);ctx.stroke();
-        }
-        ctx.restore();
-      }else if(p.t==='fan'){
-        var toyPh=(Date.now()/360)%1;
-        ctx.save();ctx.strokeStyle='rgba(111,220,255,'+(0.75-toyPh*.35)+')';ctx.lineWidth=4;
-        for(var tf=0;tf<3;tf++){
-          var fx=p.x+18+tf*24,fy=p.y-62-toyPh*42;
-          ctx.beginPath();ctx.moveTo(fx,fy);ctx.quadraticCurveTo(fx+9,fy-15,fx,fy-29);ctx.quadraticCurveTo(fx-9,fy-43,fx,fy-57);ctx.stroke();
-        }
-        ctx.restore();
-      }else if(p.t==='warp'){
-        ctx.save();ctx.translate(p.x+d.w/2,p.y+d.h/2);ctx.rotate((Date.now()/650)%6.29);
-        ctx.strokeStyle='rgba(255,239,120,.86)';ctx.lineWidth=2.5;ctx.setLineDash([5,7]);ctx.beginPath();ctx.arc(0,0,27,0,6.29);ctx.stroke();ctx.restore();
-      }else if(p.t==='star'){
-        ctx.save();ctx.globalAlpha=.42+.28*Math.sin(Date.now()/180);ctx.strokeStyle='#fff6a0';ctx.lineWidth=5;ctx.beginPath();ctx.arc(p.x+26,p.y+26,26,0,6.29);ctx.stroke();ctx.restore();
-      }
-      return;
-    }
     if(p.t==='block'){
       ctx.fillStyle='#ffb74d'; rr(ctx,p.x,p.y,d.w,d.h,8); ctx.fill();
       ctx.strokeStyle='#ef8f00'; ctx.lineWidth=3; rr(ctx,p.x,p.y,d.w,d.h,8); ctx.stroke();
@@ -5542,11 +5489,12 @@ var COLORING=(function(){
 /* ================= 3Dおえかき / カメラ重ね合わせ ================= */
 var DRAW3D=(function(){
   var box=$('#d3-box'),cv=$('#d3-cv'),ctx=cv.getContext('2d'),video=$('#d3-video');
-  var W=0,H=0,d=1,yaw=.45,pitch=-.18,shape='sphere',color='#ff5985',size=9,strokes=[],active={},rotating=false,lastMid=null,stream=null,clearConfirm=0,pendingShape='',pendingShapeAt=0,pendingShapeBtn=null,pendingShapeLabel='';
+  var W=0,H=0,d=1,yaw=.45,pitch=-.18,shape='sphere',color='#ff5985',size=9,strokes=[],drafts={sphere:strokes},active={},rotating=false,lastMid=null,stream=null,clearConfirm=0;
   var colors=['#ff5985','#ff9e3d','#ffe056','#54d38a','#39c5e6','#4e76e8','#9b65e8','#ffffff','#31354b'];
-  var names={sphere:'たま',ufo:'UFO',apple:'りんご',monster:'かいじゅう',planet:'わくせい',cake:'ケーキ',fish:'さかな',robot:'ロボ',egg:'たまご',pumpkin:'かぼちゃ',chest:'たからばこ',moon:'おつきさま',rocket:'ロケット',flower:'おはな',cloud:'くも',turtle:'かめ'};
+  var names={sphere:'たま',cube:'しかく',cylinder:'つつ',cone:'さんかく',donut:'ドーナツ',ufo:'UFO',apple:'りんご',monster:'かいじゅう',planet:'わくせい',cake:'ケーキ',fish:'さかな',robot:'ロボ',egg:'たまご',pumpkin:'かぼちゃ',chest:'たからばこ',moon:'おつきさま',rocket:'ロケット',flower:'おはな',cloud:'くも',turtle:'かめ'};
   var models={
-    sphere:{rx:1,ry:1,oy:0,a:'#9feeff',b:'#5547bc'},ufo:{rx:1.18,ry:.38,oy:.13,a:'#fbfeff',b:'#8397dd'},apple:{rx:.86,ry:.91,oy:.07,a:'#ff9d8a',b:'#db315e'},monster:{rx:.76,ry:.82,oy:.09,a:'#9ff294',b:'#45aa67'},planet:{rx:.76,ry:.76,oy:0,a:'#a8f1ff',b:'#6570db'},cake:{rx:.82,ry:.64,oy:.12,a:'#fff1c7',b:'#e8a178'},fish:{rx:.94,ry:.55,oy:.02,a:'#9af1ef',b:'#36a9d2'},robot:{rx:.7,ry:.72,oy:.08,a:'#e9f7ff',b:'#7795c8'},egg:{rx:.65,ry:.94,oy:.04,a:'#fffdf0',b:'#cdddf2'},pumpkin:{rx:.94,ry:.72,oy:.08,a:'#ffc95e',b:'#e46a2f'},chest:{rx:.82,ry:.61,oy:.13,a:'#f2b767',b:'#9d542c'},moon:{rx:.68,ry:.9,oy:0,a:'#fff7a7',b:'#df9a54'},rocket:{rx:.52,ry:.85,oy:-.02,a:'#f5fbff',b:'#9db0df'},flower:{rx:.43,ry:.43,oy:-.03,a:'#ffe37c',b:'#e98c38'},cloud:{rx:.9,ry:.46,oy:.04,a:'#fff',b:'#bcd4ec'},turtle:{rx:.83,ry:.48,oy:.07,a:'#98e8a7',b:'#389d72'}
+    sphere:{kind:'sphere',rx:1,ry:1,oy:0,a:'#9feeff',b:'#5547bc'},cube:{kind:'box',rx:.82,ry:.78,oy:.04,a:'#83e8ff',b:'#4f64c8'},cylinder:{kind:'cylinder',rx:.72,ry:.9,oy:.04,a:'#a6f0dc',b:'#368eb4'},cone:{kind:'cone',rx:.82,ry:.93,oy:.02,a:'#ffe681',b:'#ef745b'},donut:{kind:'ring',rx:.95,ry:.72,oy:.03,a:'#ffb2cf',b:'#9b58c8'},
+    ufo:{kind:'disc',rx:1.18,ry:.38,oy:.13,a:'#fbfeff',b:'#8397dd'},apple:{kind:'sphere',rx:.86,ry:.91,oy:.07,a:'#ff9d8a',b:'#db315e'},monster:{kind:'blob',rx:.76,ry:.82,oy:.09,a:'#9ff294',b:'#45aa67'},planet:{kind:'sphere',rx:.76,ry:.76,oy:0,a:'#a8f1ff',b:'#6570db'},cake:{kind:'cylinder',rx:.82,ry:.64,oy:.12,a:'#fff1c7',b:'#e8a178'},fish:{kind:'ellipsoid',rx:.94,ry:.55,oy:.02,a:'#9af1ef',b:'#36a9d2'},robot:{kind:'box',rx:.7,ry:.72,oy:.08,a:'#e9f7ff',b:'#7795c8'},egg:{kind:'sphere',rx:.65,ry:.94,oy:.04,a:'#fffdf0',b:'#cdddf2'},pumpkin:{kind:'sphere',rx:.94,ry:.72,oy:.08,a:'#ffc95e',b:'#e46a2f'},chest:{kind:'box',rx:.82,ry:.61,oy:.13,a:'#f2b767',b:'#9d542c'},moon:{kind:'crescent',rx:.68,ry:.9,oy:0,a:'#fff7a7',b:'#df9a54'},rocket:{kind:'cone',rx:.52,ry:.85,oy:-.02,a:'#f5fbff',b:'#9db0df'},flower:{kind:'disc',rx:.73,ry:.73,oy:-.03,a:'#ffe37c',b:'#e98c38'},cloud:{kind:'blob',rx:.9,ry:.46,oy:.04,a:'#fff',b:'#bcd4ec'},turtle:{kind:'ellipsoid',rx:.83,ry:.48,oy:.07,a:'#98e8a7',b:'#389d72'}
   };
   function rot(p){var cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch),x=p[0]*cy+p[2]*sy,z=-p[0]*sy+p[2]*cy,y=p[1]*cp-z*sp;z=p[1]*sp+z*cp;return[x,y,z];}
   function inv(x,y,z){var cp=Math.cos(-pitch),sp=Math.sin(-pitch),yy=y*cp-z*sp,zz=y*sp+z*cp,cy=Math.cos(-yaw),sy=Math.sin(-yaw);return[x*cy+zz*sy,yy,-x*sy+zz*cy];}
@@ -5560,7 +5508,23 @@ var DRAW3D=(function(){
   function mesh(c,m){ctx.save();ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=Math.max(1,c.r*.012);for(var lat=-2;lat<=2;lat++){ctx.beginPath();var started=false;for(var i=0;i<=70;i++){var a=i/70*6.283,v=lat*.24,p=rot([Math.cos(a)*Math.sqrt(1-v*v),v,Math.sin(a)*Math.sqrt(1-v*v)]);if(p[2]>0){var z=project(p,c,m);if(!started){ctx.moveTo(z.x,z.y);started=true;}else ctx.lineTo(z.x,z.y);}else started=false;}ctx.stroke();}for(var lon=0;lon<8;lon++){ctx.beginPath();started=false;for(i=0;i<=55;i++){var t=-1+i/27.5,a2=lon*.785,p2=rot([Math.cos(a2)*Math.sqrt(Math.max(0,1-t*t)),t,Math.sin(a2)*Math.sqrt(Math.max(0,1-t*t))]);if(p2[2]>0){z=project(p2,c,m);if(!started){ctx.moveTo(z.x,z.y);started=true;}else ctx.lineTo(z.x,z.y);}else started=false;}ctx.stroke();}ctx.restore();}
   function eye(x,y,r){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,r,0,6.29);ctx.fill();ctx.fillStyle='#40335c';ctx.beginPath();ctx.arc(x+r*.18,y,r*.42,0,6.29);ctx.fill();}
   function drawModel(c,m){var r=c.r,t=Math.sin(yaw)*r*.13,ink='#4d4169';ctx.save();ctx.lineWidth=Math.max(3,r*.035);ctx.strokeStyle=ink;ctx.lineJoin='round';ctx.lineCap='round';ctx.shadowColor='rgba(37,24,83,.42)';ctx.shadowBlur=Math.max(10,r*.16);
-    if(shape==='ufo'){
+    if(shape==='sphere'){
+      ellipse(c,m,1,1,0);
+    }else if(shape==='cube'){
+      var xo=Math.cos(yaw)*r*.28,yo=(-.22+Math.sin(pitch)*.16)*r,x0=c.x-r*.72,y0=c.y-r*.58,w=r*1.44,h=r*1.25;
+      fillGrad(c,m,.82,.78,.04);ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x0+w,y0);ctx.lineTo(x0+w,c.y+r*.67);ctx.lineTo(x0,c.y+r*.67);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.fillStyle='#bdf5ff';ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x0+xo,y0+yo);ctx.lineTo(x0+w+xo,y0+yo);ctx.lineTo(x0+w,y0);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.fillStyle='#5369c9';ctx.beginPath();ctx.moveTo(x0+w,y0);ctx.lineTo(x0+w+xo,y0+yo);ctx.lineTo(x0+w+xo,c.y+r*.67+yo);ctx.lineTo(x0+w,c.y+r*.67);ctx.closePath();ctx.fill();ctx.stroke();
+    }else if(shape==='cylinder'){
+      fillGrad(c,m,.72,.9,.04);ctx.beginPath();ctx.moveTo(c.x-r*.72,c.y-r*.62);ctx.lineTo(c.x-r*.72,c.y+r*.62);ctx.quadraticCurveTo(c.x,c.y+r*.9,c.x+r*.72,c.y+r*.62);ctx.lineTo(c.x+r*.72,c.y-r*.62);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.fillStyle='#caffef';ctx.beginPath();ctx.ellipse(c.x+t*.2,c.y-r*.62,r*.72,r*.24,0,0,6.29);ctx.fill();ctx.stroke();ctx.strokeStyle='rgba(255,255,255,.55)';ctx.beginPath();ctx.ellipse(c.x-t*.12,c.y+r*.62,r*.72,r*.24,0,0,3.14);ctx.stroke();
+    }else if(shape==='cone'){
+      var apexX=c.x+t*.7,apexY=c.y-r*.92;baseY=c.y+r*.65;
+      fillGrad(c,m,.82,.93,.02);ctx.beginPath();ctx.moveTo(apexX,apexY);ctx.lineTo(c.x-r*.82,baseY);ctx.quadraticCurveTo(c.x,baseY+r*.35,c.x+r*.82,baseY);ctx.closePath();ctx.fill();ctx.stroke();
+      ctx.fillStyle='#fff0a7';ctx.beginPath();ctx.ellipse(c.x,baseY,r*.82,r*.23,0,0,3.14);ctx.fill();ctx.stroke();
+    }else if(shape==='donut'){
+      var dg=ctx.createLinearGradient(c.x-r,c.y-r,c.x+r,c.y+r);dg.addColorStop(0,m.a);dg.addColorStop(.52,'#ff7cac');dg.addColorStop(1,m.b);ctx.strokeStyle=dg;ctx.lineWidth=r*.43;ctx.beginPath();ctx.ellipse(c.x,c.y,r*.72,r*.52,Math.sin(yaw)*.16,0,6.29);ctx.stroke();ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=r*.055;ctx.beginPath();ctx.ellipse(c.x-r*.09,c.y-r*.08,r*.7,r*.5,Math.sin(yaw)*.16,3.3,5.9);ctx.stroke();
+    }else if(shape==='ufo'){
       fillGrad(c,m,.67,.58,-.2,'#c8fbff','#667bd2');ctx.beginPath();ctx.ellipse(c.x+t*.25,c.y-r*.13,r*.67,r*.58,0,3.14,6.29);ctx.fill();ctx.stroke();ellipse(c,m,1.18,.38,.13,'#fff8dc','#7585c9');ctx.fillStyle='#6ff5ef';for(var ui=-3;ui<=3;ui++){ctx.beginPath();ctx.arc(c.x+ui*r*.27,c.y+r*.19,r*.055,0,6.29);ctx.fill();}
     }else if(shape==='apple'){
       fillGrad(c,m,.86,.91,.07);ctx.beginPath();ctx.moveTo(c.x,c.y-r*.68);ctx.bezierCurveTo(c.x-r*.25,c.y-r*.98,c.x-r*.9,c.y-r*.72,c.x-r*.86,c.y);ctx.bezierCurveTo(c.x-r*.8,c.y+r*.72,c.x-r*.28,c.y+r*.98,c.x,c.y+r*.76);ctx.bezierCurveTo(c.x+r*.28,c.y+r*.98,c.x+r*.8,c.y+r*.72,c.x+r*.86,c.y);ctx.bezierCurveTo(c.x+r*.9,c.y-r*.72,c.x+r*.25,c.y-r*.98,c.x,c.y-r*.68);ctx.closePath();ctx.fill();ctx.stroke();ctx.strokeStyle='#654329';ctx.lineWidth=r*.08;ctx.beginPath();ctx.moveTo(c.x,c.y-r*.67);ctx.quadraticCurveTo(c.x+t*.4,c.y-r*1.08,c.x+r*.08+t*.25,c.y-r*1.13);ctx.stroke();ctx.fillStyle='#63c66b';ctx.beginPath();ctx.ellipse(c.x+r*.27+t*.2,c.y-r*.94,r*.31,r*.14,-.35,0,6.29);ctx.fill();ctx.strokeStyle=ink;ctx.lineWidth=r*.03;ctx.stroke();
@@ -5593,15 +5557,14 @@ var DRAW3D=(function(){
     }else ellipse(c,m,1,1,0);
     ctx.restore();
   }
-  function render(){if(!W)return;var c=center(),m=model();ctx.clearRect(0,0,W,H);if(!stream){var g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#171638');g.addColorStop(.55,'#343064');g.addColorStop(1,'#6b4d91');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,255,255,.08)';for(var bg=0;bg<12;bg++){ctx.beginPath();ctx.arc((bg*83+31)%Math.max(W,1),(bg*47+19)%Math.max(H,1),2+(bg%3),0,6.29);ctx.fill();}}drawModel(c,m);if(shape!=='moon'&&shape!=='chest')mesh(c,m);for(var si=0;si<strokes.length;si++){var st=strokes[si];ctx.strokeStyle=st.c;ctx.lineWidth=st.w;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();var open=false;for(var pi=0;pi<st.p.length;pi++){var q=rot(st.p[pi]);if(q[2]>.02){var z=project(q,c,m);if(!open){ctx.moveTo(z.x,z.y);open=true;}else ctx.lineTo(z.x,z.y);}else open=false;}ctx.stroke();}}
+  function render(){if(!W)return;var c=center(),m=model();ctx.clearRect(0,0,W,H);if(!stream){var g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,'#171638');g.addColorStop(.55,'#343064');g.addColorStop(1,'#6b4d91');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,255,255,.08)';for(var bg=0;bg<12;bg++){ctx.beginPath();ctx.arc((bg*83+31)%Math.max(W,1),(bg*47+19)%Math.max(H,1),2+(bg%3),0,6.29);ctx.fill();}}drawModel(c,m);if(['sphere','planet','apple','egg','pumpkin'].indexOf(shape)>=0)mesh(c,m);for(var si=0;si<strokes.length;si++){var st=strokes[si];ctx.strokeStyle=st.c;ctx.lineWidth=st.w;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();var open=false;for(var pi=0;pi<st.p.length;pi++){var q=rot(st.p[pi]);if(q[2]>.02){var z=project(q,c,m);if(!open){ctx.moveTo(z.x,z.y);open=true;}else ctx.lineTo(z.x,z.y);}else open=false;}ctx.stroke();}}
   function pos(e){var r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
-  function surface(p){var c=center(),m=model(),x=(p.x-c.x)/(c.r*m.rx),y=-(p.y-c.y-m.oy*c.r)/(c.r*m.ry),q=x*x+y*y;if(q>1)return null;return inv(x,y,Math.sqrt(1-q));}
+  function surface(p){var c=center(),m=model(),x=(p.x-c.x)/(c.r*m.rx),y=-(p.y-c.y-m.oy*c.r)/(c.r*m.ry),q=x*x+y*y,hit=q<=1;if(m.kind==='box'||m.kind==='cylinder')hit=Math.abs(x)<=1&&Math.abs(y)<=1;else if(m.kind==='cone')hit=y<=1&&y>=-.82&&Math.abs(x)<=Math.max(.05,(1-y)/1.82);else if(m.kind==='ring')hit=q<=1&&q>=.13;else if(m.kind==='disc')hit=q<=1;if(!hit)return null;return inv(x,y,Math.sqrt(Math.max(.02,1-Math.min(.98,q))));}
   cv.addEventListener('pointerdown',function(e){active[e.pointerId]=pos(e);var ids=Object.keys(active);if(ids.length>=2){rotating=true;lastMid={x:(active[ids[0]].x+active[ids[1]].x)/2,y:(active[ids[0]].y+active[ids[1]].y)/2};}else{var q=surface(active[e.pointerId]);if(q)strokes.push({c:color,w:size,p:[q]});}});
   window.addEventListener('pointermove',function(e){if(cur!=='draw3d'||!active[e.pointerId])return;active[e.pointerId]=pos(e);var ids=Object.keys(active);if(ids.length>=2){var mid={x:(active[ids[0]].x+active[ids[1]].x)/2,y:(active[ids[0]].y+active[ids[1]].y)/2};if(lastMid){yaw+=(mid.x-lastMid.x)*.012;pitch=clamp(pitch+(mid.y-lastMid.y)*.01,-1.2,1.2);}lastMid=mid;render();}else if(!rotating&&strokes.length){var q=surface(active[e.pointerId]);if(q){strokes[strokes.length-1].p.push(q);render();}}});
   function up(e){delete active[e.pointerId];if(Object.keys(active).length<2){rotating=Object.keys(active).length>0;lastMid=null;}if(!Object.keys(active).length)rotating=false;}window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);
-  function resetShapeConfirm(){if(pendingShapeBtn)pendingShapeBtn.textContent=pendingShapeLabel;pendingShape='';pendingShapeAt=0;pendingShapeBtn=null;}
-  var pal=$('#d3-palette');colors.forEach(function(c){var b=document.createElement('button');b.className='art-color';b.style.background=c;b.addEventListener('click',function(){color=c;sfx('click');});pal.appendChild(b);});$$('.d3-chip').forEach(function(b){b.addEventListener('click',function(){var next=b.dataset.shape,now=Date.now();if(next===shape)return;if(strokes.length&&!(pendingShape===next&&now-pendingShapeAt<2500)){resetShapeConfirm();pendingShape=next;pendingShapeAt=now;pendingShapeBtn=b;pendingShapeLabel=b.textContent;b.textContent='もういちど';sfx('tak');setTimeout(function(){if(pendingShape===next&&Date.now()-pendingShapeAt>=2400)resetShapeConfirm();},2500);return;}resetShapeConfirm();shape=next;strokes=[];$$('.d3-chip').forEach(function(x){x.classList.toggle('sel',x===b);});sfx('pop');render();});});
-  var d3Clear=$('#d3-clear');d3Clear.addEventListener('click',function(){var now=Date.now();if(now-clearConfirm<2500){strokes=[];clearConfirm=0;d3Clear.textContent='🧽 けす';sfx('pop');render();}else{clearConfirm=now;d3Clear.textContent='もういちど おして';sfx('tak');setTimeout(function(){if(Date.now()-clearConfirm>=2400){clearConfirm=0;d3Clear.textContent='🧽 けす';}},2500);}});
+  var pal=$('#d3-palette');colors.forEach(function(c){var b=document.createElement('button');b.className='art-color';b.style.background=c;b.addEventListener('click',function(){color=c;sfx('click');});pal.appendChild(b);});$$('.d3-chip').forEach(function(b){b.addEventListener('click',function(){var next=b.dataset.shape;if(next===shape)return;drafts[shape]=strokes;shape=next;strokes=drafts[next]||[];drafts[next]=strokes;$$('.d3-chip').forEach(function(x){x.classList.toggle('sel',x===b);});box.querySelector('.art-hint').textContent=(names[next]||next)+'に かいてみよう!';sfx('pop');render();});});
+  var d3Clear=$('#d3-clear');d3Clear.addEventListener('click',function(){var now=Date.now();if(now-clearConfirm<2500){strokes=[];drafts[shape]=strokes;clearConfirm=0;d3Clear.textContent='🧽 けす';sfx('pop');render();}else{clearConfirm=now;d3Clear.textContent='もういちど おして';sfx('tak');setTimeout(function(){if(Date.now()-clearConfirm>=2400){clearConfirm=0;d3Clear.textContent='🧽 けす';}},2500);}});
   function stopAR(){if(stream){stream.getTracks().forEach(function(t){t.stop();});stream=null;}video.srcObject=null;video.classList.remove('on');box.classList.remove('ar');$('#d3-ar').textContent='📷 カメラに かさねる';render();}
   $('#d3-ar').addEventListener('click',function(){if(stream){stopAR();return;}if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){speak('このブラウザでは カメラを つかえません','ja-JP',.9);return;}navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false}).then(function(s){stream=s;video.srcObject=s;video.play();video.classList.add('on');box.classList.add('ar');$('#d3-ar').textContent='📷 カメラをとじる';render();}).catch(function(){speak('カメラを つかうには きょかしてね','ja-JP',.9);});});
   $('#d3-save').addEventListener('click',function(){var out=document.createElement('canvas');out.width=cv.width;out.height=cv.height;var o=out.getContext('2d');if(stream)try{o.drawImage(video,0,0,out.width,out.height);}catch(e){}o.drawImage(cv,0,0);var data=out.toDataURL('image/jpeg',.9);ARTSAVE.add('3d',data,'3D '+(names[shape]||shape),{shape:shape,strokes:strokes,yaw:yaw,pitch:pitch}).then(function(){artSaved(box);sfx('yay');showSavedImage(data,false);}).catch(function(){artSaved(box,'ほぞん できなかったよ\nもういちど ためしてね');sfx('tak');});});
