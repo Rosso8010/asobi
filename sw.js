@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v79-quality16-album-delete';
+var CACHE = 'asobi-v80-quality17-piano-tone';
 var ASSETS = [
   './',
   './index.html',
