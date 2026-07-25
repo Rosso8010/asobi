@@ -1055,7 +1055,7 @@ body.calm .toolbar-scroll-cue,body.calm .ui-tap-star{animation:none!important}
       <div id="set-data-status" class="settings-data-status">端末内の記録は、アプリを消すと失われる場合があります。</div>
     </div>
     <div class="settings-actions"><button id="set-update" class="actbtn">🔄 更新を確認</button><button id="settings-close" class="quizbtn">できた</button></div>
-    <div id="settings-status" class="settings-foot">あそびのくに 2026.07.25-quality17</div>
+    <div id="settings-status" class="settings-foot">あそびのくに 2026.07.25-quality18</div>
   </div>
 </div>
 <div id="app-update" class="app-update" role="status"><strong>✨ あたらしい「あそびのくに」が じゅんびできたよ</strong><button id="app-update-now">いま きりかえる</button></div>
@@ -1096,7 +1096,7 @@ function rr(ctx,x,y,w,h,r){ // rounded rect path (Safari15 has no ctx.roundRect)
 }
 
 /* ================= global comfort settings ================= */
-var APP_VERSION='2026.07.25-quality17';
+var APP_VERSION='2026.07.25-quality18';
 var PREF={sound:true,speech:true,calm:false};
 try{
   var savedPref=JSON.parse(localStorage.getItem('asobi-settings-v1')||'null');
@@ -3669,6 +3669,7 @@ var PIANO=(function(){
   var keyBox=$('#pn-keys'),songBar=$('#pn-songbar'),songName=$('#pn-songname'),msg=$('#pn-message');
   var countEl=$('#pn-count'),prog=$('#pn-progress-in'),complete=$('#pn-complete'),road=$('#pn-road-cv'),roadCtx=road.getContext('2d'),judge=$('#pn-judge'),resultBox=$('#pn-result');
   var lesson=false,current=null,step=0,finishTimer=0,resultTimer=0,chordHit={},chordStarted=0,stepDue=0,beatMs=625,leadMs=2200,roadRAF=0,perfects=0,goods=0,guides=0;
+  var pianoBus=null,pianoLimiter=null;
   var best={};
   try{best=JSON.parse(localStorage.getItem('asobi-piano-best-v1')||'{}')||{};}catch(e){best={};}
   var WHITE=[],BLACK=[],NAMES=['ド','レ','ミ','ファ','ソ','ラ','シ'];
@@ -3752,18 +3753,30 @@ var PIANO=(function(){
     else{showJudge('つぎは すこし はやく ♪','guide');msg.textContent='だいじょうぶ! つぎを みてみよう';}
   }
   function freqFor(id){return 130.8128*Math.pow(2,id/12);}
+  function pianoOutput(c){
+    if(pianoBus)return pianoBus;
+    pianoBus=c.createGain();pianoLimiter=c.createDynamicsCompressor();
+    pianoBus.gain.setValueAtTime(1.22,c.currentTime);
+    pianoLimiter.threshold.setValueAtTime(-15,c.currentTime);
+    pianoLimiter.knee.setValueAtTime(10,c.currentTime);
+    pianoLimiter.ratio.setValueAtTime(6,c.currentTime);
+    pianoLimiter.attack.setValueAtTime(.004,c.currentTime);
+    pianoLimiter.release.setValueAtTime(.2,c.currentTime);
+    pianoBus.connect(pianoLimiter);pianoLimiter.connect(c.destination);
+    return pianoBus;
+  }
   function playNote(id){
     if(!PREF.sound)return;
     try{
-      var f=freqFor(id),c=ac(),t=c.currentTime+.004,master=c.createGain(),filter=c.createBiquadFilter();
-      filter.type='lowpass';filter.frequency.setValueAtTime(Math.min(2600,900+f*3.2),t);filter.Q.setValueAtTime(.7,t);
+      var f=freqFor(id),c=ac(),t=c.currentTime,master=c.createGain(),filter=c.createBiquadFilter();
+      filter.type='lowpass';filter.frequency.setValueAtTime(Math.min(3100,1050+f*3.8),t);filter.Q.setValueAtTime(.65,t);
       master.gain.setValueAtTime(.0001,t);
-      master.gain.linearRampToValueAtTime(.24,t+.014);
-      master.gain.exponentialRampToValueAtTime(.115,t+.19);
-      master.gain.exponentialRampToValueAtTime(.0001,t+1.12);
-      filter.connect(master);master.connect(c.destination);
-      var body=c.createOscillator();body.type='triangle';body.frequency.setValueAtTime(f,t);body.detune.setValueAtTime(-3,t);body.connect(filter);body.start(t);body.stop(t+1.16);
-      var warmth=c.createOscillator(),warmGain=c.createGain();warmth.type='sine';warmth.frequency.setValueAtTime(f,t);warmth.detune.setValueAtTime(3,t);warmGain.gain.setValueAtTime(.34,t);warmth.connect(warmGain);warmGain.connect(filter);warmth.start(t);warmth.stop(t+1.16);
+      master.gain.linearRampToValueAtTime(.34,t+.012);
+      master.gain.exponentialRampToValueAtTime(.17,t+.2);
+      master.gain.exponentialRampToValueAtTime(.0001,t+1.18);
+      filter.connect(master);master.connect(pianoOutput(c));
+      var body=c.createOscillator();body.type='triangle';body.frequency.setValueAtTime(f,t);body.detune.setValueAtTime(-2,t);body.connect(filter);body.start(t);body.stop(t+1.22);
+      var warmth=c.createOscillator(),warmGain=c.createGain();warmth.type='sine';warmth.frequency.setValueAtTime(f,t);warmth.detune.setValueAtTime(2,t);warmGain.gain.setValueAtTime(.38,t);warmth.connect(warmGain);warmGain.connect(filter);warmth.start(t);warmth.stop(t+1.22);
     }catch(e){}
   }
   function clearLights(){
@@ -3828,7 +3841,7 @@ var PIANO=(function(){
     clearLights();
   }
   function press(id,btn){
-    try{if(window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}
+    try{if(window.speechSynthesis&&(window.speechSynthesis.speaking||window.speechSynthesis.pending))window.speechSynthesis.cancel();}catch(e){}
     playNote(id);btn.classList.add('hit');setTimeout(function(){btn.classList.remove('hit');},220);
     var r=btn.getBoundingClientRect();CONF.burst(r.left+r.width/2,r.top+20,lesson?6:4);
     if(!lesson||!current){msg.textContent='いい おと! もっと ひいてみよう';return;}
@@ -3844,9 +3857,9 @@ var PIANO=(function(){
       var delta=hitAt-stepDue;
       if(delta<-650){chordHit={};chordStarted=0;showJudge('まだだよ ♪','guide');msg.textContent='ノーツが きいろい ラインに きたら ひこう';return;}
       timing(delta);
-      var oldStep=step;step++;chordHit={};chordStarted=0;
-      if(step>=steps.length){finish();return;}update();
-      stepDue=Math.max(stepDue+beatFor(current,oldStep)*beatMs,now+Math.min(520,beatMs*.72));
+      var oldStep=step,nextDue=stepDue+beatFor(current,oldStep)*beatMs;step++;chordHit={};chordStarted=0;
+      if(step>=steps.length){finish();return;}
+      stepDue=Math.max(nextDue,now+Math.min(520,beatMs*.72));update();
     }else{
       msg.textContent='その おとも すてき! つぎは ひかる けんばんを ひこう';
     }
@@ -3889,9 +3902,11 @@ var PIANO=(function(){
   keyBox.addEventListener('touchcancel',endTouches,{passive:true});
   function startSong(song){
     clearTimeout(resultTimer);resultBox.classList.add('hidden');
+    try{if(window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}
+    try{ac();}catch(e){}
     current=song;step=0;lesson=true;chordHit={};chordStarted=0;perfects=0;goods=0;guides=0;beatMs=60000/(song.tempo||96);stepDue=performance.now()+leadMs;songName.textContent=song.icon+' '+song.name;msg.textContent='ノーツが ラインに きたら ひこう!';
     var bs=songBar.querySelectorAll('button');for(var i=0;i<bs.length;i++)bs[i].classList.toggle('sel',bs[i].dataset.song===song.id);
-    update();startRoad();sfx('yay');speak(song.name+'。ノーツが きいろい ラインに きたら ひいてね','ja-JP',0.82);
+    update();startRoad();
   }
   function makeSongs(){
     SONGS.forEach(function(song){
@@ -3900,7 +3915,7 @@ var PIANO=(function(){
     });
     updateSongBadges();
   }
-  $('#pn-free').addEventListener('click',function(){clearTimeout(resultTimer);resultBox.classList.add('hidden');lesson=false;current=null;step=0;chordHit={};clearLights();songName.textContent='🎹 じゆう えんそう';msg.textContent='すきな けんばんを おしてみよう!';update();drawRoad();speak('じゆうに ひいてみよう','ja-JP',0.85);});
+  $('#pn-free').addEventListener('click',function(){clearTimeout(resultTimer);resultBox.classList.add('hidden');try{if(window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}try{ac();}catch(e){}lesson=false;current=null;step=0;chordHit={};clearLights();songName.textContent='🎹 じゆう えんそう';msg.textContent='すきな けんばんを おしてみよう!';update();drawRoad();});
   $('#pn-retry').addEventListener('click',function(){if(current)startSong(current);else{sfx('click');msg.textContent='うえから きょくを えらんでね';}});
   $('#pn-result-retry').addEventListener('click',function(){if(current)startSong(current);});
   $('#pn-result-close').addEventListener('click',function(){resultBox.classList.add('hidden');sfx('click');msg.textContent='このまま じゆうに ひいていいよ!';});
