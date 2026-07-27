@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v81-quality18-piano-sync';
+var CACHE = 'asobi-v83-quality20-home-fit';
 var ASSETS = [
   './',
   './index.html',

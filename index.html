@@ -663,6 +663,32 @@ body.calm .toolbar-scroll-cue,body.calm .ui-tap-star{animation:none!important}
 @media(orientation:portrait){.sampler-body{padding:8px;gap:7px}.sampler-guide{padding:6px 8px;font-size:12px;flex-wrap:wrap}.sampler-status{min-width:90%;font-size:11px}.sampler-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(5,minmax(0,1fr));gap:7px}.sample-pad{border-width:3px;border-radius:20px;box-shadow:0 5px 0 rgba(25,10,55,.65)}.sample-pad b{font-size:26px}.sample-pad span{font-size:10px}}
 @media(max-width:700px){.brain-level-pick{gap:4px;padding:3px 5px}.brain-level-pick span{display:none}.brain-level-pick button{min-height:30px;padding:3px 8px;font-size:10px}.brain-turn-svg{width:58px;height:48px}}
 @media(max-height:500px) and (orientation:landscape){.brain-level-pick{position:absolute;z-index:15;right:58px;top:5px;padding:0;background:transparent}.brain-level-pick button{min-height:32px}.brain-level-pick span{display:none}}
+
+/* Quality 20: all 15 home modes must fit inside the live iPad/Android viewport. */
+#scr-home{--home-cols:5;--home-rows:3;justify-content:flex-start!important;overflow:hidden!important;touch-action:none!important;gap:7px;padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+#scr-home .home-brand{flex:0 0 auto;width:100%;min-height:0;margin:0;padding:0 54px;transform:none}
+#scr-home .home-title{max-width:100%;padding:5px 15px 6px;border-radius:19px;font-size:clamp(21px,3.3vw,34px);line-height:1;white-space:nowrap}
+#scr-home .home-sub{margin-top:4px;padding:3px 11px;font-size:clamp(11px,1.7vw,14px)}
+#scr-home .home-grid{align-self:stretch;flex:1 1 auto;min-width:0;min-height:0;width:100%;height:100%;grid-template-columns:repeat(var(--home-cols),minmax(0,1fr))!important;grid-template-rows:repeat(var(--home-rows),minmax(0,1fr))!important;grid-auto-flow:row;gap:7px}
+#scr-home .home-card,#scr-home .home-card[data-go="piano"],#scr-home .home-card[data-go="brain"],#scr-home .home-card[data-go="adventure"],#scr-home .home-card[data-go="rush"]{grid-column:auto!important;min-width:0!important;min-height:0!important;width:100%;height:100%;overflow:hidden;padding:5px 4px;border-width:3px;border-radius:18px;gap:3px;animation:none!important;box-shadow:0 4px 0 rgba(87,54,68,.24),0 7px 12px rgba(115,65,73,.12)}
+#scr-home .home-card .big,#scr-home .home-card[data-go="piano"] .big,#scr-home .home-card[data-go="brain"] .big,#scr-home .home-card[data-go="adventure"] .big,#scr-home .home-card[data-go="rush"] .big{flex:0 0 clamp(31px,5.2vh,47px);width:clamp(31px,5.2vh,47px);height:clamp(31px,5.2vh,47px);border-radius:14px}
+#scr-home .card-name{display:-webkit-box;overflow:hidden;max-width:100%;font-size:clamp(11px,1.55vw,16px);line-height:1.05;text-align:center;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+#scr-home .card-sub{display:none}
+#scr-home.home-portrait{--home-cols:3;--home-rows:5}
+#scr-home.home-portrait .home-title{font-size:clamp(18px,5.2vw,31px)}
+#scr-home.home-portrait .home-card{justify-content:center}
+#scr-home.home-compact{gap:4px;padding-top:max(4px,env(safe-area-inset-top));padding-bottom:max(4px,env(safe-area-inset-bottom))}
+#scr-home.home-compact .home-brand{padding:0 47px}
+#scr-home.home-compact .home-title{padding:3px 9px 4px;border-radius:15px;font-size:clamp(17px,4.7vw,25px)}
+#scr-home.home-compact .home-sub{display:none}
+#scr-home.home-compact .home-grid{gap:4px}
+#scr-home.home-compact .home-card{padding:2px 3px;border-radius:14px;border-width:2px;box-shadow:0 3px 0 rgba(87,54,68,.24)}
+#scr-home.home-compact .home-card .big{flex-basis:clamp(25px,5vh,35px);width:clamp(25px,5vh,35px);height:clamp(25px,5vh,35px);border-radius:10px}
+#scr-home.home-compact .card-name{font-size:clamp(9px,1.7vw,12px)}
+#scr-home.home-tiny .home-brand{position:absolute;z-index:7;left:50%;top:max(3px,env(safe-area-inset-top));width:auto;padding:0;transform:translateX(-50%);pointer-events:none}
+#scr-home.home-tiny .home-title{padding:2px 8px 3px;font-size:16px}
+#scr-home.home-tiny .home-grid{padding-top:32px}
+@media(max-width:500px){#scr-home .home-brand{padding-left:48px;padding-right:48px}#scr-home .home-sub{display:none}#scr-home .home-card .big{flex-basis:clamp(28px,6vh,39px);width:clamp(28px,6vh,39px);height:clamp(28px,6vh,39px)}#scr-home .card-name{font-size:clamp(10px,3.15vw,13px)}}
 </style>
 
 <div id="scr-home" class="screen active">
@@ -1055,7 +1081,7 @@ body.calm .toolbar-scroll-cue,body.calm .ui-tap-star{animation:none!important}
       <div id="set-data-status" class="settings-data-status">端末内の記録は、アプリを消すと失われる場合があります。</div>
     </div>
     <div class="settings-actions"><button id="set-update" class="actbtn">🔄 更新を確認</button><button id="settings-close" class="quizbtn">できた</button></div>
-    <div id="settings-status" class="settings-foot">あそびのくに 2026.07.25-quality18</div>
+    <div id="settings-status" class="settings-foot">あそびのくに 2026.07.27-quality20</div>
   </div>
 </div>
 <div id="app-update" class="app-update" role="status"><strong>✨ あたらしい「あそびのくに」が じゅんびできたよ</strong><button id="app-update-now">いま きりかえる</button></div>
@@ -1096,7 +1122,7 @@ function rr(ctx,x,y,w,h,r){ // rounded rect path (Safari15 has no ctx.roundRect)
 }
 
 /* ================= global comfort settings ================= */
-var APP_VERSION='2026.07.25-quality18';
+var APP_VERSION='2026.07.27-quality20';
 var PREF={sound:true,speech:true,calm:false};
 try{
   var savedPref=JSON.parse(localStorage.getItem('asobi-settings-v1')||'null');
@@ -3669,7 +3695,7 @@ var PIANO=(function(){
   var keyBox=$('#pn-keys'),songBar=$('#pn-songbar'),songName=$('#pn-songname'),msg=$('#pn-message');
   var countEl=$('#pn-count'),prog=$('#pn-progress-in'),complete=$('#pn-complete'),road=$('#pn-road-cv'),roadCtx=road.getContext('2d'),judge=$('#pn-judge'),resultBox=$('#pn-result');
   var lesson=false,current=null,step=0,finishTimer=0,resultTimer=0,chordHit={},chordStarted=0,stepDue=0,beatMs=625,leadMs=2200,roadRAF=0,perfects=0,goods=0,guides=0;
-  var pianoBus=null,pianoLimiter=null;
+  var pianoBus=null,pianoToneFilter=null,pianoVoices=[];
   var best={};
   try{best=JSON.parse(localStorage.getItem('asobi-piano-best-v1')||'{}')||{};}catch(e){best={};}
   var WHITE=[],BLACK=[],NAMES=['ド','レ','ミ','ファ','ソ','ラ','シ'];
@@ -3755,28 +3781,31 @@ var PIANO=(function(){
   function freqFor(id){return 130.8128*Math.pow(2,id/12);}
   function pianoOutput(c){
     if(pianoBus)return pianoBus;
-    pianoBus=c.createGain();pianoLimiter=c.createDynamicsCompressor();
-    pianoBus.gain.setValueAtTime(1.22,c.currentTime);
-    pianoLimiter.threshold.setValueAtTime(-15,c.currentTime);
-    pianoLimiter.knee.setValueAtTime(10,c.currentTime);
-    pianoLimiter.ratio.setValueAtTime(6,c.currentTime);
-    pianoLimiter.attack.setValueAtTime(.004,c.currentTime);
-    pianoLimiter.release.setValueAtTime(.2,c.currentTime);
-    pianoBus.connect(pianoLimiter);pianoLimiter.connect(c.destination);
+    pianoBus=c.createGain();pianoToneFilter=c.createBiquadFilter();
+    pianoBus.gain.setValueAtTime(.96,c.currentTime);
+    pianoToneFilter.type='lowpass';pianoToneFilter.frequency.setValueAtTime(3200,c.currentTime);pianoToneFilter.Q.setValueAtTime(.55,c.currentTime);
+    pianoBus.connect(pianoToneFilter);pianoToneFilter.connect(c.destination);
     return pianoBus;
   }
-  function playNote(id){
+  function playNote(id,groupSize){
     if(!PREF.sound)return;
     try{
-      var f=freqFor(id),c=ac(),t=c.currentTime,master=c.createGain(),filter=c.createBiquadFilter();
-      filter.type='lowpass';filter.frequency.setValueAtTime(Math.min(3100,1050+f*3.8),t);filter.Q.setValueAtTime(.65,t);
+      var f=freqFor(id),c=ac(),t=c.currentTime,now=performance.now(),master=c.createGain(),trim=c.createGain(),body=c.createOscillator(),recent=[],i;
+      pianoVoices=pianoVoices.filter(function(v){return now-v.at<900;});
+      for(i=0;i<pianoVoices.length;i++)if(now-pianoVoices[i].at<70)recent.push(pianoVoices[i]);
+      var voice={at:now,trim:trim};recent.push(voice);pianoVoices.push(voice);
+      var chordSize=Math.max(recent.length,groupSize||1),chordScale=1/(1+.34*(chordSize-1));
+      for(i=0;i<recent.length;i++){
+        recent[i].trim.gain.cancelScheduledValues(t);
+        recent[i].trim.gain.setTargetAtTime(chordScale,t,.004);
+      }
       master.gain.setValueAtTime(.0001,t);
-      master.gain.linearRampToValueAtTime(.34,t+.012);
-      master.gain.exponentialRampToValueAtTime(.17,t+.2);
-      master.gain.exponentialRampToValueAtTime(.0001,t+1.18);
-      filter.connect(master);master.connect(pianoOutput(c));
-      var body=c.createOscillator();body.type='triangle';body.frequency.setValueAtTime(f,t);body.detune.setValueAtTime(-2,t);body.connect(filter);body.start(t);body.stop(t+1.22);
-      var warmth=c.createOscillator(),warmGain=c.createGain();warmth.type='sine';warmth.frequency.setValueAtTime(f,t);warmth.detune.setValueAtTime(2,t);warmGain.gain.setValueAtTime(.38,t);warmth.connect(warmGain);warmGain.connect(filter);warmth.start(t);warmth.stop(t+1.22);
+      master.gain.linearRampToValueAtTime(.43,t+.009);
+      master.gain.exponentialRampToValueAtTime(.13,t+.16);
+      master.gain.exponentialRampToValueAtTime(.038,t+.42);
+      master.gain.exponentialRampToValueAtTime(.0001,t+.86);
+      body.type='triangle';body.frequency.setValueAtTime(f,t);body.connect(master);master.connect(trim);trim.connect(pianoOutput(c));body.start(t);body.stop(t+.9);
+      setTimeout(function(){var p=pianoVoices.indexOf(voice);if(p>=0)pianoVoices.splice(p,1);},950);
     }catch(e){}
   }
   function clearLights(){
@@ -3840,10 +3869,10 @@ var PIANO=(function(){
     clearTimeout(resultTimer);resultTimer=setTimeout(showResult,980);
     clearLights();
   }
-  function press(id,btn){
+  function press(id,btn,groupSize){
     try{if(window.speechSynthesis&&(window.speechSynthesis.speaking||window.speechSynthesis.pending))window.speechSynthesis.cancel();}catch(e){}
-    playNote(id);btn.classList.add('hit');setTimeout(function(){btn.classList.remove('hit');},220);
-    var r=btn.getBoundingClientRect();CONF.burst(r.left+r.width/2,r.top+20,lesson?6:4);
+    playNote(id,groupSize);btn.classList.add('hit');setTimeout(function(){btn.classList.remove('hit');},180);
+    var r=btn.getBoundingClientRect();CONF.burst(r.left+r.width/2,r.top+20,groupSize>1?1:(lesson?3:2));
     if(!lesson||!current){msg.textContent='いい おと! もっと ひいてみよう';return;}
     var steps=stepsFor(current),target=steps[step]||[],now=performance.now(),isTarget=target.indexOf(id)>=0;
     if(isTarget){
@@ -3885,17 +3914,21 @@ var PIANO=(function(){
   }
   keyBox.addEventListener('touchstart',function(e){
     e.preventDefault();
+    var hits=[];
     for(var i=0;i<e.changedTouches.length;i++){
       var t=e.changedTouches[i],b=keyAtTouch(t);
-      if(b){touchNotes[t.identifier]=b.dataset.pnote;press(parseInt(b.dataset.pnote,10),b);}
+      if(b){touchNotes[t.identifier]=b.dataset.pnote;hits.push({id:parseInt(b.dataset.pnote,10),b:b});}
     }
+    for(var h=0;h<hits.length;h++)press(hits[h].id,hits[h].b,hits.length);
   },{passive:false});
   keyBox.addEventListener('touchmove',function(e){
     e.preventDefault();
+    var hits=[];
     for(var i=0;i<e.changedTouches.length;i++){
       var t=e.changedTouches[i],b=keyAtTouch(t),note=b?b.dataset.pnote:'';
-      if(b&&touchNotes[t.identifier]!==note){touchNotes[t.identifier]=note;press(parseInt(note,10),b);}
+      if(b&&touchNotes[t.identifier]!==note){touchNotes[t.identifier]=note;hits.push({id:parseInt(note,10),b:b});}
     }
+    for(var h=0;h<hits.length;h++)press(hits[h].id,hits[h].b,hits.length);
   },{passive:false});
   function endTouches(e){for(var i=0;i<e.changedTouches.length;i++)delete touchNotes[e.changedTouches[i].identifier];}
   keyBox.addEventListener('touchend',endTouches,{passive:true});
@@ -6001,6 +6034,12 @@ function syncAppViewport(){
   var vv=window.visualViewport,h=Math.round(vv&&vv.height?vv.height:window.innerHeight),w=Math.round(vv&&vv.width?vv.width:window.innerWidth);
   if(h>0)document.documentElement.style.setProperty('--app-height',h+'px');
   if(w>0)document.documentElement.style.setProperty('--app-width',w+'px');
+  var home=$('#scr-home');
+  if(home&&w>0&&h>0){
+    home.classList.toggle('home-portrait',h>=w);
+    home.classList.toggle('home-compact',h<720);
+    home.classList.toggle('home-tiny',h<480);
+  }
 }
 function onResize(){
   syncAppViewport();
