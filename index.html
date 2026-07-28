@@ -1122,7 +1122,7 @@ function rr(ctx,x,y,w,h,r){ // rounded rect path (Safari15 has no ctx.roundRect)
 }
 
 /* ================= global comfort settings ================= */
-var APP_VERSION='2026.07.27-quality20';
+var APP_VERSION='2026.07.28-quality22';
 var PREF={sound:true,speech:true,calm:false};
 try{
   var savedPref=JSON.parse(localStorage.getItem('asobi-settings-v1')||'null');
@@ -1273,11 +1273,15 @@ function showToolbarCue(name){
 }
 function show(name){
   if(hooks[cur]&&hooks[cur].leave)hooks[cur].leave();
+  try{if(window.speechSynthesis)window.speechSynthesis.cancel();}catch(speechError){}
   var el=document.getElementById('scr-'+cur);
   if(el)el.classList.remove('active');
   cur=name;
   if(name!=='home'&&window.HOME)HOME.remember(name);
-  document.getElementById('scr-'+cur).classList.add('active');
+  var nextScreen=document.getElementById('scr-'+cur);
+  nextScreen.classList.add('active');
+  var nextBar=nextScreen.querySelector('.topbar');
+  if(nextBar)nextBar.scrollLeft=0;
   if(hooks[name]&&hooks[name].enter)hooks[name].enter();
   showToolbarCue(name);
 }
@@ -3512,8 +3516,16 @@ var KS=(function(){
   $('#ks-hint').addEventListener('click',function(){
     renderHint(false);
   });
+  function leave(){
+    if(nextTimer){clearTimeout(nextTimer);nextTimer=0;}
+    if(celebrateTimer){clearTimeout(celebrateTimer);celebrateTimer=0;}
+    answered=true;
+    $('#ks-celebrate').className='hidden';
+    $('#ks-problem').classList.remove('ks-win');
+    $('#scr-keisan').classList.remove('ks-super');
+  }
   updScore();showLevel();updJourney();
-  return {enter:function(){sessionSolved=0;updJourney();gen();}};
+  return {enter:function(){sessionSolved=0;updJourney();gen();},leave:leave};
 })();
 
 /* ================= 読み上げ ================= */
@@ -3696,6 +3708,12 @@ var PIANO=(function(){
   var countEl=$('#pn-count'),prog=$('#pn-progress-in'),complete=$('#pn-complete'),road=$('#pn-road-cv'),roadCtx=road.getContext('2d'),judge=$('#pn-judge'),resultBox=$('#pn-result');
   var lesson=false,current=null,step=0,finishTimer=0,resultTimer=0,chordHit={},chordStarted=0,stepDue=0,beatMs=625,leadMs=2200,roadRAF=0,perfects=0,goods=0,guides=0;
   var pianoBus=null,pianoToneFilter=null,pianoVoices=[];
+  var pianoSampleState='idle',pianoSampleBuffers={},pianoSampleError='';
+  var PIANO_SAMPLES=[
+    {id:0,file:'audio/piano/C3.mp3'},{id:3,file:'audio/piano/Ds3.mp3'},{id:6,file:'audio/piano/Fs3.mp3'},
+    {id:9,file:'audio/piano/A3.mp3'},{id:12,file:'audio/piano/C4.mp3'},{id:15,file:'audio/piano/Ds4.mp3'},
+    {id:18,file:'audio/piano/Fs4.mp3'},{id:21,file:'audio/piano/A4.mp3'},{id:24,file:'audio/piano/C5.mp3'}
+  ];
   var best={};
   try{best=JSON.parse(localStorage.getItem('asobi-piano-best-v1')||'{}')||{};}catch(e){best={};}
   var WHITE=[],BLACK=[],NAMES=['ド','レ','ミ','ファ','ソ','ラ','シ'];
@@ -3779,34 +3797,120 @@ var PIANO=(function(){
     else{showJudge('つぎは すこし はやく ♪','guide');msg.textContent='だいじょうぶ! つぎを みてみよう';}
   }
   function freqFor(id){return 130.8128*Math.pow(2,id/12);}
+  function decodePianoSample(c,data){
+    return new Promise(function(resolve,reject){
+      var settled=false;
+      function ok(buffer){if(!settled){settled=true;resolve(buffer);}}
+      function ng(error){if(!settled){settled=true;reject(error||new Error('decode failed'));}}
+      try{
+        var result=c.decodeAudioData(data,ok,ng);
+        if(result&&typeof result.then==='function')result.then(ok,ng);
+      }catch(error){ng(error);}
+    });
+  }
+  function preloadPiano(){
+    if(pianoSampleState==='ready'||pianoSampleState==='loading'||pianoSampleState==='error')return;
+    if(!window.fetch||!window.Promise){pianoSampleState='error';pianoSampleError='このブラウザでは よみこめません';return;}
+    pianoSampleState='loading';
+    var c;
+    try{c=ac();}catch(error){pianoSampleState='error';pianoSampleError='おとの じゅんびが できません';return;}
+    Promise.all(PIANO_SAMPLES.map(function(sample){
+      return fetch(sample.file,{cache:'force-cache'}).then(function(response){
+        if(!response.ok)throw new Error(sample.file+' '+response.status);
+        return response.arrayBuffer();
+      }).then(function(data){return decodePianoSample(c,data);}).then(function(buffer){
+        pianoSampleBuffers[sample.id]=buffer;
+      });
+    })).then(function(){
+      pianoSampleState='ready';pianoSampleError='';
+      if(cur==='piano'&&lesson&&current){
+        chordHit={};chordStarted=0;stepDue=performance.now()+leadMs;
+        msg.textContent='✨ じゅんび OK! ノーツが ラインに きたら ひこう!';update();
+      }else if(cur==='piano')msg.textContent='✨ グランドピアノの おと、じゅんび OK!';
+    }).catch(function(error){
+      pianoSampleState='error';pianoSampleError=String(error&&error.message||error);
+      if(cur==='piano'&&!lesson)msg.textContent='いつもの ピアノの おとで あそべるよ';
+    });
+  }
+  function nearestPianoSample(id){
+    var nearest=PIANO_SAMPLES[0],distance=99;
+    for(var i=0;i<PIANO_SAMPLES.length;i++){
+      var d=Math.abs(id-PIANO_SAMPLES[i].id);
+      if(d<distance){distance=d;nearest=PIANO_SAMPLES[i];}
+    }
+    return nearest;
+  }
   function pianoOutput(c){
     if(pianoBus)return pianoBus;
     pianoBus=c.createGain();pianoToneFilter=c.createBiquadFilter();
-    pianoBus.gain.setValueAtTime(.96,c.currentTime);
-    pianoToneFilter.type='lowpass';pianoToneFilter.frequency.setValueAtTime(3200,c.currentTime);pianoToneFilter.Q.setValueAtTime(.55,c.currentTime);
+    pianoBus.gain.setValueAtTime(.92,c.currentTime);
+    pianoToneFilter.type='lowpass';pianoToneFilter.frequency.setValueAtTime(7600,c.currentTime);pianoToneFilter.Q.setValueAtTime(.35,c.currentTime);
     pianoBus.connect(pianoToneFilter);pianoToneFilter.connect(c.destination);
     return pianoBus;
   }
-  function playNote(id,groupSize){
-    if(!PREF.sound)return;
+  function removePianoVoice(voice){
+    var p=pianoVoices.indexOf(voice);if(p>=0)pianoVoices.splice(p,1);
+  }
+  function quietPianoVoice(voice,c,t){
+    if(!voice||voice.ended)return;voice.ended=true;
     try{
-      var f=freqFor(id),c=ac(),t=c.currentTime,now=performance.now(),master=c.createGain(),trim=c.createGain(),body=c.createOscillator(),recent=[],i;
-      pianoVoices=pianoVoices.filter(function(v){return now-v.at<900;});
-      for(i=0;i<pianoVoices.length;i++)if(now-pianoVoices[i].at<70)recent.push(pianoVoices[i]);
-      var voice={at:now,trim:trim};recent.push(voice);pianoVoices.push(voice);
-      var chordSize=Math.max(recent.length,groupSize||1),chordScale=1/(1+.34*(chordSize-1));
-      for(i=0;i<recent.length;i++){
-        recent[i].trim.gain.cancelScheduledValues(t);
-        recent[i].trim.gain.setTargetAtTime(chordScale,t,.004);
-      }
-      master.gain.setValueAtTime(.0001,t);
-      master.gain.linearRampToValueAtTime(.43,t+.009);
-      master.gain.exponentialRampToValueAtTime(.13,t+.16);
-      master.gain.exponentialRampToValueAtTime(.038,t+.42);
-      master.gain.exponentialRampToValueAtTime(.0001,t+.86);
-      body.type='triangle';body.frequency.setValueAtTime(f,t);body.connect(master);master.connect(trim);trim.connect(pianoOutput(c));body.start(t);body.stop(t+.9);
-      setTimeout(function(){var p=pianoVoices.indexOf(voice);if(p>=0)pianoVoices.splice(p,1);},950);
-    }catch(e){}
+      voice.trim.gain.cancelScheduledValues(t);voice.trim.gain.setTargetAtTime(.0001,t,.018);
+      if(voice.source)voice.source.stop(t+.1);
+    }catch(error){}
+    setTimeout(function(){removePianoVoice(voice);},140);
+  }
+  function voiceShare(c,t,trim,groupSize,life,source){
+    var now=performance.now(),recent=[],i;
+    pianoVoices=pianoVoices.filter(function(v){return !v.ended&&now-v.at<4700;});
+    for(i=0;i<pianoVoices.length;i++)if(now-pianoVoices[i].at<72)recent.push(pianoVoices[i]);
+    var voice={at:now,trim:trim,source:source,ended:false};recent.push(voice);pianoVoices.push(voice);
+    var chordSize=Math.max(recent.length,groupSize||1),chordScale=1/(1+.34*(chordSize-1));
+    for(i=0;i<recent.length;i++){
+      recent[i].trim.gain.cancelScheduledValues(t);
+      recent[i].trim.gain.setTargetAtTime(chordScale,t,.006);
+    }
+    while(pianoVoices.length>22)quietPianoVoice(pianoVoices.shift(),c,t);
+    setTimeout(function(){voice.ended=true;removePianoVoice(voice);},Math.ceil(life*1000)+160);
+    return voice;
+  }
+  function playSampleNote(id,groupSize,c,t){
+    var sample=nearestPianoSample(id),buffer=pianoSampleBuffers[sample.id];
+    if(!buffer)return false;
+    var source=c.createBufferSource(),master=c.createGain(),trim=c.createGain();
+    source.buffer=buffer;source.playbackRate.setValueAtTime(Math.pow(2,(id-sample.id)/12),t);
+    var life=Math.max(.7,Math.min(4.4,buffer.duration/source.playbackRate.value-.025));
+    var peak=.56,mid=t+Math.max(.28,life*.18),tail=t+Math.max(.58,life*.68);
+    master.gain.setValueAtTime(.0001,t);
+    master.gain.linearRampToValueAtTime(peak,t+.007);
+    master.gain.exponentialRampToValueAtTime(.43,mid);
+    master.gain.exponentialRampToValueAtTime(.14,tail);
+    master.gain.exponentialRampToValueAtTime(.0001,t+life);
+    source.connect(master);master.connect(trim);trim.connect(pianoOutput(c));
+    var voice=voiceShare(c,t,trim,groupSize,life,source);
+    source.onended=function(){voice.ended=true;removePianoVoice(voice);};
+    source.start(t);source.stop(t+life+.02);
+    return true;
+  }
+  function playFallbackNote(id,groupSize,c,t){
+    var f=freqFor(id),now=performance.now(),master=c.createGain(),trim=c.createGain(),body=c.createOscillator();
+    master.gain.setValueAtTime(.0001,t);
+    master.gain.linearRampToValueAtTime(.43,t+.009);
+    master.gain.exponentialRampToValueAtTime(.13,t+.16);
+    master.gain.exponentialRampToValueAtTime(.038,t+.42);
+    master.gain.exponentialRampToValueAtTime(.0001,t+.86);
+    body.type='triangle';body.frequency.setValueAtTime(f,t);body.connect(master);master.connect(trim);trim.connect(pianoOutput(c));
+    var voice=voiceShare(c,t,trim,groupSize,.9,body);body.onended=function(){voice.ended=true;removePianoVoice(voice);};
+    body.start(t);body.stop(t+.9);
+  }
+  function playNote(id,groupSize){
+    if(!PREF.sound)return true;
+    if(pianoSampleState==='idle')preloadPiano();
+    if(pianoSampleState==='loading'){msg.textContent='🎹 グランドピアノの おとを じゅんびちゅう…';return false;}
+    try{
+      var c=ac(),t=c.currentTime;
+      if(pianoSampleState==='ready'&&playSampleNote(id,groupSize,c,t))return true;
+      playFallbackNote(id,groupSize,c,t);return true;
+    }catch(e){return false;}
   }
   function clearLights(){
     var ks=allKeys();for(var i=0;i<ks.length;i++)ks[i].classList.remove('next','chord','ready','wrong','hit');
@@ -3871,7 +3975,8 @@ var PIANO=(function(){
   }
   function press(id,btn,groupSize){
     try{if(window.speechSynthesis&&(window.speechSynthesis.speaking||window.speechSynthesis.pending))window.speechSynthesis.cancel();}catch(e){}
-    playNote(id,groupSize);btn.classList.add('hit');setTimeout(function(){btn.classList.remove('hit');},180);
+    if(!playNote(id,groupSize)){btn.classList.add('hit');setTimeout(function(){btn.classList.remove('hit');},180);return;}
+    btn.classList.add('hit');setTimeout(function(){btn.classList.remove('hit');},180);
     var r=btn.getBoundingClientRect();CONF.burst(r.left+r.width/2,r.top+20,groupSize>1?1:(lesson?3:2));
     if(!lesson||!current){msg.textContent='いい おと! もっと ひいてみよう';return;}
     var steps=stepsFor(current),target=steps[step]||[],now=performance.now(),isTarget=target.indexOf(id)>=0;
@@ -3959,9 +4064,11 @@ var PIANO=(function(){
   makeKeys();makeSongs();update();
   return {
     enter:function(){
-      if(!current){songName.textContent='きょくを えらんでね';msg.textContent='ノーツが ラインに きたら ひこう!';}startRoad();
+      preloadPiano();
+      if(!current){songName.textContent='きょくを えらんでね';msg.textContent=pianoSampleState==='loading'?'🎹 グランドピアノの おとを じゅんびちゅう…':'ノーツが ラインに きたら ひこう!';}startRoad();
     },
-    leave:function(){clearTimeout(resultTimer);resultBox.classList.add('hidden');if(roadRAF)cancelAnimationFrame(roadRAF);roadRAF=0;}
+    leave:function(){clearTimeout(resultTimer);resultBox.classList.add('hidden');if(roadRAF)cancelAnimationFrame(roadRAF);roadRAF=0;},
+    preload:preloadPiano
   };
 })();
 
@@ -6005,7 +6112,7 @@ hooks.coloring={enter:COLORING.enter};
 hooks.draw3d={enter:DRAW3D.enter,leave:DRAW3D.leave};
 hooks.gallery={enter:GALLERY.enter,leave:GALLERY.leave};
 hooks.brain={enter:BRAIN.enter,leave:BRAIN.leave};
-hooks.keisan={enter:KS.enter};
+hooks.keisan={enter:KS.enter,leave:KS.leave};
 hooks.abc={enter:ABC.enter};
 hooks.hiragana={enter:HIRAGANA.enter};
 hooks.katakana={enter:KATAKANA.enter};
@@ -6018,7 +6125,7 @@ hooks.home={enter:function(){UT.stopAll();HOME.enter();PWA.network();}};
 hooks.uta={enter:UT.enter,leave:UT.leave};
 hooks.sampler={enter:SAMPLER.enter,leave:SAMPLER.leave};
 
-document.addEventListener('pointerdown',function(){try{ac();}catch(e){}},true);
+document.addEventListener('pointerdown',function(){try{ac();PIANO.preload();}catch(e){}},true);
 document.addEventListener('touchmove',function(e){
   var el=e.target&&e.target.nodeType===1?e.target:e.target&&e.target.parentElement;
   while(el&&el!==document.body){

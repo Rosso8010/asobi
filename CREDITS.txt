@@ -44,3 +44,14 @@ https://creativecommons.org/licenses/by-sa/3.0/
 遊びやすい長さ・音域へ編曲しています。
 Mutopia Project: https://www.ibiblio.org/mutopia/
 IMSLP: https://imslp.org/
+
+ピアノ音色について
+================
+ピアノステージの音色には、Alexander Holm 氏が収録した
+Salamander Grand Piano（Yamaha C5）のサンプルを使用しています。
+アプリでは2オクターブ向けに必要な音だけをMP3で同梱し、
+オフラインで再生できるようにしています。
+Author: Alexander Holm
+License: Creative Commons Attribution 3.0 (CC BY 3.0)
+https://sfzinstruments.github.io/pianos/salamander/
+https://creativecommons.org/licenses/by/3.0/

@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v83-quality20-home-fit';
+var CACHE = 'asobi-v85-quality22-grand-piano';
 var ASSETS = [
   './',
   './index.html',
@@ -14,6 +14,15 @@ var ASSETS = [
   './mode-learning.webp',
   './mode-creative.webp',
   './piano-stage-art.webp',
+  './audio/piano/C3.mp3',
+  './audio/piano/Ds3.mp3',
+  './audio/piano/Fs3.mp3',
+  './audio/piano/A3.mp3',
+  './audio/piano/C4.mp3',
+  './audio/piano/Ds4.mp3',
+  './audio/piano/Fs4.mp3',
+  './audio/piano/A4.mp3',
+  './audio/piano/C5.mp3',
   './kanji-studio-art.webp',
   './coloring-atlas-v1.png',
   './rush-world.webp',
@@ -160,7 +169,7 @@ self.addEventListener('install', function (e) {
 self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys().then(function (keys) {
-      return Promise.all(keys.filter(function (k) { return k !== CACHE; })
+      return Promise.all(keys.filter(function (k) { return k.indexOf('asobi-') === 0 && k !== CACHE; })
         .map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
   );
@@ -176,12 +185,12 @@ self.addEventListener('fetch', function (e) {
       fetch(e.request, { cache: 'no-store' }).then(function (res) {
         if (res && res.ok) {
           var copy = res.clone();
-          caches.open(CACHE).then(function (c) { c.put('./index.html', copy); });
+          caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
         }
         return res;
       }).catch(function () {
-        return caches.match('./index.html').then(function (r) {
-          return r || caches.match('./');
+        return caches.match(e.request, { ignoreSearch: true }).then(function (r) {
+          return r || caches.match('./index.html');
         });
       })
     );
@@ -191,10 +200,12 @@ self.addEventListener('fetch', function (e) {
     caches.match(e.request, { ignoreSearch: true }).then(function (r) {
       if (r) return r;
       return fetch(e.request).then(function (res) {
-        var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
+        if (res && res.ok) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
+        }
         return res;
       });
-    }).catch(function () { return caches.match('./index.html'); })
+    }).catch(function () { return new Response('', { status: 504, statusText: 'Offline' }); })
   );
 });
