@@ -97,7 +97,7 @@ if(!/function rankFor\(total\)[\s\S]*?リズムの ほうせき/.test(html))erro
 if(!/function saveResult\(total,rank\)[\s\S]*?updateSongBadges/.test(html))errors.push('piano result does not update song badges');
 if(!/var answerPreview=b;[\s\S]*?brain-explain-answer/.test(html))errors.push('brain explanation does not retain the correct visual answer');
 if(!/sfx\('pop'\);b\.disabled=true[\s\S]*?つに しぼれたよ/.test(html))errors.push('brain retry does not narrow choices gently');
-if(!/APP_VERSION='2026\.11\.05-museum'/.test(html))errors.push('visible app version is stale');
+if(!/APP_VERSION='2026\.11\.05-size-choice-fix'/.test(html))errors.push('visible app version is stale');
 if(!/k\.indexOf\('asobi-'\)\s*===\s*0\s*&&\s*k\s*!==\s*CACHE/.test(sw))errors.push('main service worker can delete sibling app caches');
 if(/c\.put\('\.\/index\.html',\s*copy\)/.test(sw))errors.push('main service worker can overwrite the app shell with a child page');
 if(!/new Response\('',\s*\{\s*status:\s*504/.test(sw))errors.push('main service worker returns HTML when an offline asset is missing');
@@ -143,7 +143,7 @@ if(!/albumClearAt=now;b\.textContent='ほんとうに？'/.test(html)||!/もう�
 if(!/function playSampleNote\(id,groupSize,c,t\)[\s\S]*?source\.buffer=buffer/.test(html))errors.push('piano grand-piano main tone is missing');
 if(!/createMediaElementSource\(a\)/.test(html)||!/function releaseSongAfterMic\(\)/.test(html))errors.push('karaoke volume is not controlled through a dedicated gain stage');
 if(!/function foldMirror\(arr\)[\s\S]*?function symmetry\(\)/.test(html))errors.push('brain folding task is not a mirror-fold problem');
-if(!/function orderSize\(\)[\s\S]*?brain-size-q[\s\S]*?v===mid/.test(html))errors.push('brain size task has no exact middle target');
+if(!/function orderSize\(\)[\s\S]*?shuf\(sizes\)[\s\S]*?v===mid/.test(html))errors.push('brain size task has no unique median');
 if(/koro-toy-parts-v1\.png|krToyArt|drawToyPart/.test(html+sw))errors.push('Koro Koro still uses pseudo-3D toy art');
 const d3Shapes=uniq([...markup.matchAll(/\bdata-shape="([^"]+)"/g)].map(m=>m[1]));
 if(d3Shapes.length<6)errors.push('3D drawing has too few genuine surface choices: '+d3Shapes.length);
