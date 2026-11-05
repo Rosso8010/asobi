@@ -1,0 +1,10 @@
+/* The battle keeps its contrast; menus use the same predictable controls as the hub. */
+body{font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI",sans-serif}
+.hdr{min-height:60px;background:#203d49!important;border-bottom:1px solid #62838b;gap:9px;padding:8px 12px}
+.btn{min-height:46px;border:1px solid #9bbeb7!important;border-radius:12px!important;background:#e8f3dd!important;color:#25494b!important;box-shadow:0 3px 0 #6d968b!important;padding:10px 14px;font-weight:bold}
+.btn.sub{background:#e6ecf7!important;color:#354860!important}.btn.dim{background:#d8dee1!important;color:#44545e!important}
+.btn:focus-visible,.chtab:focus-visible{outline:4px solid #ffe38e;outline-offset:3px}
+.card{border-radius:18px!important;border-color:#6f8b92!important}.chtab{min-height:44px;border-radius:11px}
+.body{padding:14px}.small{line-height:1.6}.wallet{gap:7px}.chip{padding:5px 10px;background:#19313d;border-color:#557b87}
+.unitFilters .btn{min-height:42px}.ov .box{border-radius:20px}.btn[disabled]{opacity:.5;filter:none}
+@media(max-width:700px){.hdr{padding:7px;gap:5px}.hdr .ttl{font-size:14px}.wallet .chip{font-size:11px}.btn{padding:8px 10px}}
