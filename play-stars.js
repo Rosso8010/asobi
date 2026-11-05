@@ -1,0 +1,15 @@
+(function(root){
+ 'use strict';
+ var C=root.WORLD_CORE,session=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),seq=0,activity={},toastTimer;
+ function notify(text){var t=document.getElementById('shared-star-toast');if(!t){t=document.createElement('div');t.id='shared-star-toast';t.setAttribute('role','status');document.body.appendChild(t);}t.textContent=text;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},1800);}
+ function refresh(){var s;try{s=C.read(localStorage);}catch(e){return;}document.querySelectorAll('.shared-star-balance,.quest-wallet').forEach(function(b){b.textContent='★ '+s.stars;});}
+ function earn(mode,id,amount){if(!C)return false;var token='play:'+mode+':'+id;try{var before=C.read(localStorage);if(before.awards.indexOf(token)>=0)return false;C.reward(localStorage,token,amount||1,mode);refresh();notify('★ ＋'+(amount||1)+'　共通の星をゲット！');return true;}catch(e){notify('星を保存できません：'+e.message);return false;}}
+ function event(mode,amount){if(root.QUEST&&QUEST.active())return false;return earn(mode,session+':'+(++seq),amount||1);}
+ function progress(mode,signature,count,unique){if(root.QUEST&&QUEST.active())return;var p=activity[mode]||(activity[mode]={count:0,seen:{}});p.count++;p.seen[String(signature)]=true;if(p.count>=(count||8)&&Object.keys(p.seen).length>=(unique||3)){p.count=0;p.seen={};event(mode);}}
+ function hash(text){var n=2166136261;for(var i=0;i<text.length;i++)n=Math.imul(n^text.charCodeAt(i),16777619);return(n>>>0).toString(36);}
+ function artwork(row){if(!row||row.deletedAt||!row.img)return;earn(row.kind==='coloring'?'coloring':row.kind==='3d'?'draw3d':'oekaki','art:'+hash(row.img),3);}
+ function enter(){refresh();}
+ function init(){document.querySelectorAll('.screen>.topbar,#scr-home .home-head').forEach(function(bar){if(bar.querySelector('.shared-star-balance'))return;var b=document.createElement('span');b.className='shared-star-balance';b.title='どの遊びでも共通の星';bar.insertBefore(b,bar.children[1]||null);});if(!document.querySelector('.shared-star-balance')){var b=document.createElement('span');b.className='shared-star-balance child-star-balance';document.body.appendChild(b);}var home=document.querySelector('#scr-home');if(home&&!home.querySelector('.home-shared-stars')){var balance=document.createElement('span');balance.className='shared-star-balance home-shared-stars';home.appendChild(balance);}refresh();var preview=new URLSearchParams(location.search).get('previewGame');if(preview&&root.QUEST)setTimeout(function(){var game=QUEST.catalogue().find(function(g){return g.key===preview;});if(game)QUEST.start([game],'ゲームプレビュー');},0);window.addEventListener('storage',function(e){if(e.key==='asobi-world-v1')refresh();});}
+ root.PLAY_STARS={earn:earn,event:event,progress:progress,artwork:artwork,refresh:refresh,enter:enter,hash:hash};
+ if(typeof document!=='undefined')window.addEventListener('DOMContentLoaded',init);
+})(typeof window!=='undefined'?window:globalThis);

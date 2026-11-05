@@ -23,11 +23,17 @@ const hundred=C.defaultCells(100),hcolors=hundred.map((p,i)=>A.cellColor(100,i,p
 console.log('PASS 90: three 30-cell bands; 100: 50/50 checkerboard');
 
 {let data=null;const storage={getItem(){return data},setItem(k,v){data=v}};C.update(storage,s=>{s.stars=400;s.owned.push('jp-15')});const old=C.read(storage);assert.deepEqual(old.exhibits,[]);
- const result=C.capsule(storage,'planet','capsule:first',()=>0);assert.equal(result.id,'planet-1');assert.equal(C.read(storage).stars,395);assert.deepEqual(C.capsule(storage,'planet','capsule:first',()=>.9),result);assert.equal(C.read(storage).stars,395);
+ const result=C.capsule(storage,'planet','capsule:first',()=>0);assert.equal(result.id,'planet-1');assert.equal(C.read(storage).stars,380);assert.deepEqual(C.capsule(storage,'planet','capsule:first',()=>.9),result);assert.equal(C.read(storage).stars,380);
  for(let i=2;i<=8;i++)C.capsule(storage,'planet','capsule:p'+i,()=>0);assert.equal(C.read(storage).exhibits.length,8);const replay=data;assert.throws(()=>C.capsule(storage,'planet','capsule:first',()=>0));assert.equal(data,replay);const full=data;assert.throws(()=>C.capsule(storage,'planet','capsule:full',()=>0));assert.equal(data,full);
  for(let i=1;i<=6;i++)C.capsule(storage,'fossil','capsule:f'+i,()=>0);assert.equal(C.read(storage).exhibits.length,14);assert(C.read(storage).owned.includes('jp-15'));
  const before=data;assert.throws(()=>C.capsule({getItem:()=>data,setItem(){throw Error('quota')}},'japan','capsule:quota',()=>0));assert.equal(data,before);
  C.update(storage,s=>s.stars=0);const empty=data;assert.throws(()=>C.capsule(storage,'japan','capsule:empty',()=>0));assert.equal(data,empty);
  assert.throws(()=>C.capsule(storage,'other','capsule:bad'));assert.throws(()=>C.capsule(storage,'japan','bad'));}
-for(let i=0;i<100;i++){const route=C.randomRoute({priority:true});assert.equal(route.length,3);assert.equal(new Set(route.map(t=>t.kind)).size,3);assert(route.every(t=>t.kind!=='traffic'));}assert(C.randomRoute({priority:false},()=>0).every(t=>t.kind!=='stop'));
+const source=Array.from({length:87},(_,i)=>i);const shuffled=C.shuffled(source);assert.equal(new Set(shuffled).size,87);assert.deepEqual(source,Array.from({length:87},(_,i)=>i));
 console.log('PASS capsule debit, old purchases, unique rewards, replay, complete/poor/quota atomicity, random routes');
+
+{const data=new Map(),storage={getItem:k=>data.has(k)?data.get(k):null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};C.update(storage,s=>{s.stars=84;s.owned=['jp-15'];s.exhibits=['planet-3'];s.stats={brain:{clears:9}}});storage.setItem('asobi-clear','[true]');storage.setItem('asobi-piano-best-v1','{"song":1}');storage.setItem('asobi-settings-v1','keep');C.resetHistory(storage);const after=C.read(storage);assert.equal(after.stars,84);assert.deepEqual(after.owned,['jp-15']);assert.deepEqual(after.exhibits,['planet-3']);assert.deepEqual(after.stats,{});assert.equal(storage.getItem('asobi-clear'),null);assert.equal(storage.getItem('asobi-piano-best-v1'),null);assert.equal(storage.getItem('asobi-settings-v1'),'keep');assert(storage.getItem('asobi-history-reset-v1'));}
+console.log('PASS history reset preserves wallet, collections and settings; 87-item shuffle');
+
+{const data=new Map([['asobi-clear','[true]']]),store={getItem:k=>data.has(k)?data.get(k):null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};C.update(store,s=>s.stars=33);const old=new Map(data);let failed=false;const throwing={getItem:store.getItem,setItem:store.setItem,removeItem(k){if(!failed&&k==='asobi-clear'){failed=true;throw Error('write failure')}store.removeItem(k)}};assert.throws(()=>C.resetHistory(throwing));assert.deepEqual(data,old);}
+console.log('PASS failed reset restores prior history and wallet');

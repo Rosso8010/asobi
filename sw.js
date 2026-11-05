@@ -1,9 +1,12 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v93-museum-20261105';
+var CACHE = 'asobi-v96-size-choice-fix-20261105';
 var ASSETS = [
   './',
   './index.html',
   './world-core.js',
+  './play-stars.js',
+  './rush-experience.css',
+  './minigame-preview.html',
   './number-art.js',
   './quest.js',
   './museum.js',
