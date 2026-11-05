@@ -21,3 +21,13 @@ console.log('PASS reference tens colors, seven vertical rainbow bands, distinct 
 const ninety=C.defaultCells(90),ncolors=ninety.map((p,i)=>A.cellColor(90,i,p,ninety));assert.equal(new Set(ncolors).size,3);for(const color of new Set(ncolors))assert.equal(ncolors.filter(c=>c===color).length,30);
 const hundred=C.defaultCells(100),hcolors=hundred.map((p,i)=>A.cellColor(100,i,p,hundred));assert.equal(new Set(hcolors).size,2);for(const color of new Set(hcolors))assert.equal(hcolors.filter(c=>c===color).length,50);for(let i=0;i<100;i++){if(i%10<9)assert.notEqual(hcolors[i],hcolors[i+1]);if(i<90)assert.notEqual(hcolors[i],hcolors[i+10]);}
 console.log('PASS 90: three 30-cell bands; 100: 50/50 checkerboard');
+
+{let data=null;const storage={getItem(){return data},setItem(k,v){data=v}};C.update(storage,s=>{s.stars=400;s.owned.push('jp-15')});const old=C.read(storage);assert.deepEqual(old.exhibits,[]);
+ const result=C.capsule(storage,'planet','capsule:first',()=>0);assert.equal(result.id,'planet-1');assert.equal(C.read(storage).stars,395);assert.deepEqual(C.capsule(storage,'planet','capsule:first',()=>.9),result);assert.equal(C.read(storage).stars,395);
+ for(let i=2;i<=8;i++)C.capsule(storage,'planet','capsule:p'+i,()=>0);assert.equal(C.read(storage).exhibits.length,8);const replay=data;assert.throws(()=>C.capsule(storage,'planet','capsule:first',()=>0));assert.equal(data,replay);const full=data;assert.throws(()=>C.capsule(storage,'planet','capsule:full',()=>0));assert.equal(data,full);
+ for(let i=1;i<=6;i++)C.capsule(storage,'fossil','capsule:f'+i,()=>0);assert.equal(C.read(storage).exhibits.length,14);assert(C.read(storage).owned.includes('jp-15'));
+ const before=data;assert.throws(()=>C.capsule({getItem:()=>data,setItem(){throw Error('quota')}},'japan','capsule:quota',()=>0));assert.equal(data,before);
+ C.update(storage,s=>s.stars=0);const empty=data;assert.throws(()=>C.capsule(storage,'japan','capsule:empty',()=>0));assert.equal(data,empty);
+ assert.throws(()=>C.capsule(storage,'other','capsule:bad'));assert.throws(()=>C.capsule(storage,'japan','bad'));}
+for(let i=0;i<100;i++){const route=C.randomRoute({priority:true});assert.equal(route.length,3);assert.equal(new Set(route.map(t=>t.kind)).size,3);assert(route.every(t=>t.kind!=='traffic'));}assert(C.randomRoute({priority:false},()=>0).every(t=>t.kind!=='stop'));
+console.log('PASS capsule debit, old purchases, unique rewards, replay, complete/poor/quota atomicity, random routes');

@@ -692,6 +692,7 @@ body.calm .toolbar-scroll-cue,body.calm .ui-tap-star{animation:none!important}
 </style>
 <link rel="stylesheet" href="redesign.css">
 <link rel="stylesheet" href="quest.css">
+<link rel="stylesheet" href="museum.css">
 
 <div id="scr-home" class="screen active">
   <button id="settings-open" class="home-settings" aria-label="おとな設定">⚙️</button>
@@ -1109,6 +1110,7 @@ body.calm .toolbar-scroll-cue,body.calm .ui-tap-star{animation:none!important}
 <script src="world-core.js"></script>
 <script src="number-art.js"></script>
 <script src="japan-map.js"></script>
+<script src="museum.js"></script>
 <script src="quest.js"></script>
 <script src="backup.js"></script>
 <script src="studio.js"></script>
@@ -1131,7 +1133,7 @@ function rr(ctx,x,y,w,h,r){ // rounded rect path (Safari15 has no ctx.roundRect)
 }
 
 /* ================= global comfort settings ================= */
-var APP_VERSION='2026.11.05-block-finish';
+var APP_VERSION='2026.11.05-museum';
 var PREF={sound:true,speech:true,calm:false};
 try{
   var savedPref=JSON.parse(localStorage.getItem('asobi-settings-v1')||'null');

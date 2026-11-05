@@ -1,11 +1,19 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v92-block-finish-20261105';
+var CACHE = 'asobi-v93-museum-20261105';
 var ASSETS = [
   './',
   './index.html',
   './world-core.js',
   './number-art.js',
   './quest.js',
+  './museum.js',
+  './museum.css',
+  './museum-room.webp',
+  './museum-delivery.webp',
+  './museum-skeleton.webp',
+  './museum-machines.webp',
+  './museum-planets.webp',
+  './museum-fossils.webp',
   './quest.css',
   './japan-map.js',
   './redesign.css',
