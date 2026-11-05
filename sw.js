@@ -1,8 +1,17 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v85-quality22-grand-piano';
+var CACHE = 'asobi-v92-block-finish-20261105';
 var ASSETS = [
   './',
   './index.html',
+  './world-core.js',
+  './number-art.js',
+  './quest.js',
+  './quest.css',
+  './japan-map.js',
+  './redesign.css',
+  './redesign.js',
+  './studio.js',
+  './backup.js',
   './manifest.webmanifest',
   './icon-180.png',
   './icon-192.png',
@@ -37,6 +46,7 @@ var ASSETS = [
   './rush-bin.png',
   './mofu-wars/',
   './mofu-wars/index.html',
+  './mofu-wars/redesign.css',
   './mofu-wars/battle-worlds.webp',
   './mofu-wars/battle-worlds-2.webp',
   './mofu-wars/battle-impact-v12.webp',
@@ -208,4 +218,10 @@ self.addEventListener('fetch', function (e) {
       });
     }).catch(function () { return new Response('', { status: 504, statusText: 'Offline' }); })
   );
+});
+
+// Verify this exact cache, rather than treating network access as offline readiness.
+self.addEventListener('message',function(e){
+  if(!e.data||e.data.type!=='CHECK_OFFLINE'||!e.ports[0])return;
+  e.waitUntil(caches.open(CACHE).then(function(c){return Promise.all(ASSETS.map(function(u){return c.match(encodeURI(u));}));}).then(function(rows){e.ports[0].postMessage({ready:rows.every(function(r){return !!r;})});}).catch(function(){e.ports[0].postMessage({ready:false});}));
 });
