@@ -1,0 +1,23 @@
+const assert=require('assert'),C=require('./world-core.js');
+for(const n of C.referenceNumbers){const shapes=C.shapes(n);assert(shapes.length>=(n===1?1:2));for(const s of shapes){assert.equal(s.cells.length,n);assert.equal(new Set(s.cells.map(String)).size,n);const seen=new Set([String(s.cells[0])]);let changed=true;while(changed){changed=false;for(const p of s.cells){if(seen.has(String(p)))continue;if([[1,0],[-1,0],[0,1],[0,-1]].some(d=>seen.has(String([p[0]+d[0],p[1]+d[1]])))){seen.add(String(p));changed=true;}}}assert.equal(seen.size,n,'disconnected '+s.name);}}
+const A=require('./number-art.js');for(const n of C.referenceNumbers){const spec=A.spec(n);assert.equal(spec.n,n);assert(spec.name.length>0);for(const shape of C.shapes(n)){const cs=C.normalize(shape.cells),colors=cs.map((p,i)=>A.cellColor(n,i,p,cs));assert(colors.every(c=>/^#[0-9a-f]{6}$/i.test(c)));if(n>10&&n<20)assert.equal(colors.filter(c=>c===A.tens[10]).length,10,'ten + units '+n+' '+shape.name);}}assert.equal(new Set(C.defaultCells(7).map((p,i)=>A.cellColor(7,i,p,C.defaultCells(7)))).size,7);assert.equal(A.spec(8).arms,8);assert.equal(A.spec(3).crown,'three');assert.equal(A.spec(100).eye,'single-panel');
+assert.throws(()=>C.defaultCells(0));assert.throws(()=>C.shapes(101));assert.throws(()=>C.defaultCells(1.5));
+assert(!C.overlap({n:3,col:0,row:0,cells:[[0,0],[0,1],[1,0]]},{n:1,col:1,row:1}));assert(C.overlap({n:3,col:0,row:0,cells:[[0,0],[0,1],[1,0]]},{n:1,col:0,row:1}));
+for(const range of ['small','mixed','double'])for(const op of ['add','sub','mul','div'])for(let i=0;i<200;i++){const q=C.question({range,ops:[op]});assert(Number.isSafeInteger(q.ans)&&q.ans>=0);if(range==='mixed'){assert(q.a>=10&&q.a<=99);assert(q.b>=1&&q.b<=9);}if(range==='double'){assert(q.a>=10&&q.a<=99);assert(q.b>=10&&q.b<=99);}assert.equal(q.ans,op==='add'?q.a+q.b:op==='sub'?q.a-q.b:op==='mul'?q.a*q.b:q.a/q.b);}
+const mem={data:{},getItem(k){return this.data[k]||null},setItem(k,v){this.data[k]=v}};C.reward(mem,'run:1',5);C.reward(mem,'run:1',5);assert.equal(C.read(mem).stars,5);C.buy(mem,'jp-15',5);assert.equal(C.read(mem).stars,0);assert.throws(()=>C.buy(mem,'jp-15',5));assert.throws(()=>C.buy(mem,'jp-99',5));assert.throws(()=>C.buy(mem,'jp-01',5));assert.deepEqual(C.read(mem).owned,['jp-15']);
+const before=mem.data['asobi-world-v1'];mem.setItem=()=>{throw Error('quota')};assert.throws(()=>C.reward(mem,'run:2',5));assert.equal(mem.data['asobi-world-v1'],before);
+(async()=>{const clock=C.clock();let hit=0;clock.setTimeout(()=>hit++,50);await new Promise(r=>setTimeout(r,15));clock.pause();const frozen=clock.now();await new Promise(r=>setTimeout(r,70));assert.equal(clock.now(),frozen);assert.equal(hit,0);clock.resume();await new Promise(r=>setTimeout(r,70));assert.equal(hit,1);clock.setTimeout(()=>hit++,10);clock.reset();await new Promise(r=>setTimeout(r,20));assert.equal(hit,1);console.log('PASS shapes: 28 reference numbers, connectivity, occupied-cell collision, 2400 math questions, idempotent rewards, purchases, write failure, pause/resume');})().catch(e=>{console.error(e);process.exitCode=1});
+
+assert.equal(C.referenceNumbers.length,28);for(let n=21;n<100;n++)if(n%10!==0){assert.throws(()=>C.number(n));assert.throws(()=>A.spec(n));}
+
+// Reference colors are explicit; tens must not inherit the next character's palette.
+const expectedTens={30:'#f0ed95',40:'#77c768',50:'#69cdbb',60:'#9064c4',80:'#dc449b'};
+for(const [value,color] of Object.entries(expectedTens)){const n=Number(value),cs=C.defaultCells(n);assert(cs.every((p,i)=>A.cellColor(n,i,p,cs)===color));}
+const seventy=C.defaultCells(70);for(let x=0;x<7;x++)assert.equal(new Set(seventy.filter(p=>p[0]===x).map(p=>A.cellColor(70,seventy.indexOf(p),p,seventy))).size,1);
+assert.equal(new Set(seventy.map((p,i)=>A.cellColor(70,i,p,seventy))).size,7);
+assert(new Set([30,40,50,60,70,80,90,100].map(n=>JSON.stringify([A.spec(n).eye,A.spec(n).expression,A.spec(n).faceHeight,A.spec(n).faceScale]))).size===8);
+console.log('PASS reference tens colors, seven vertical rainbow bands, distinct faces');
+
+const ninety=C.defaultCells(90),ncolors=ninety.map((p,i)=>A.cellColor(90,i,p,ninety));assert.equal(new Set(ncolors).size,3);for(const color of new Set(ncolors))assert.equal(ncolors.filter(c=>c===color).length,30);
+const hundred=C.defaultCells(100),hcolors=hundred.map((p,i)=>A.cellColor(100,i,p,hundred));assert.equal(new Set(hcolors).size,2);for(const color of new Set(hcolors))assert.equal(hcolors.filter(c=>c===color).length,50);for(let i=0;i<100;i++){if(i%10<9)assert.notEqual(hcolors[i],hcolors[i+1]);if(i<90)assert.notEqual(hcolors[i],hcolors[i+10]);}
+console.log('PASS 90: three 30-cell bands; 100: 50/50 checkerboard');

@@ -11,9 +11,9 @@ const sandbox={
  btoa:s=>Buffer.from(s,'binary').toString('base64'),atob:s=>Buffer.from(s,'base64').toString('binary'),
  setTimeout:()=>0,clearTimeout(){},requestAnimationFrame:()=>1,cancelAnimationFrame(){},confirm:()=>true,
  localStorage:{getItem:k=>storage[k]||null,setItem:(k,v)=>storage[k]=String(v)},
- Image:function(){this.complete=false;this.naturalWidth=0;},
+ Image:function(){this.complete=false;this.naturalWidth=0;this.removeAttribute=function(k){delete this[k];};},
  navigator:{},location:{protocol:'file:',search:'',href:''},
- document:{querySelector:s=>el(s.replace(/^#/,'')),createElement:()=>el('made'+Math.random()),addEventListener(){}},
+ document:{body:{classList:cls()},querySelector:s=>el(s.replace(/^#/,'')),createElement:()=>el('made'+Math.random()),addEventListener(){}},
  window:{addEventListener(){},devicePixelRatio:1}
 };
 sandbox.window.window=sandbox.window; sandbox.window.document=sandbox.document;

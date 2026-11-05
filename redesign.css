@@ -1,0 +1,56 @@
+/* Shared controls keep each game's identity while making navigation predictable. */
+:root{--ink:#283c4b;--paper:#fcfaf4;--accent:#287d7b;--line:#d8e2e2}
+.screen.active{animation:none!important}
+button{transition:background .12s,transform .12s;touch-action:manipulation}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:4px solid #1879b7!important;outline-offset:3px}
+button:disabled{opacity:.45;cursor:default}
+input,textarea,select{font:inherit;user-select:text!important;-webkit-user-select:text!important;touch-action:manipulation}
+.screen>.topbar{min-height:66px;padding:8px 12px;gap:8px;background:#fffdf7!important;color:var(--ink)!important;border-bottom:1px solid var(--line)!important;box-shadow:0 3px 12px #24485c0d;overflow-x:auto;flex-wrap:nowrap;flex-shrink:0;scrollbar-width:thin}
+.topbar>*{flex-shrink:0}.topbar .ttl{font-size:19px;color:var(--ink)!important;text-shadow:none!important}
+.topbar button,.toolrow button,.settings-actions button{min-height:46px;border:1px solid #d8e2e2!important;border-radius:13px!important;background:#fff!important;color:var(--ink)!important;box-shadow:0 2px 0 #d9e2e2!important;font-size:14px;font-weight:700;padding:9px 12px}
+.topbar .homebtn{position:sticky;left:0;z-index:5;background:#e6f3ef!important;min-width:55px}
+.topbar .quizbtn,.topbar .studio-primary{background:#287d7b!important;color:white!important;border-color:#287d7b!important}
+.topbar button.sel,.toolrow button.sel{background:#fff0bc!important;color:#553c1e!important}
+.mode-help{min-width:46px}.mode-tip{position:absolute;z-index:40;top:75px;left:15px;right:15px;max-width:650px;margin:auto;padding:18px 22px;background:#fffdf6;color:#283c4b;border:2px solid #76aaa2;border-radius:18px;box-shadow:0 10px 35px #24485c33;font-size:18px;line-height:1.7}
+#scr-home{background:radial-gradient(ellipse at 90% 0%,#dff0e6,transparent 55%),#f6f3e9!important;gap:12px!important;padding:18px!important}
+#scr-home:before,#scr-home:after{display:none!important}
+#scr-home .home-brand{padding:2px 70px 5px!important;text-align:left}
+#scr-home .home-title{background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;text-shadow:none!important;color:#274b50!important;font-size:32px!important;padding:8px 0!important;letter-spacing:.06em}
+#scr-home .home-sub{display:block!important;background:none!important;color:#55716d!important;font-size:14px!important;padding:0!important;margin-top:4px!important;box-shadow:none!important}
+#scr-home .home-grid{gap:12px!important}
+#scr-home .home-card{position:relative;align-items:flex-start;justify-content:center;padding:13px 15px!important;background:#fffdf8!important;border:1px solid #d9e2dc!important;border-top:5px solid var(--tile,#6bafa1)!important;border-radius:20px!important;box-shadow:0 4px 0 #dae2d9!important;color:#293e49!important;gap:7px!important;flex-direction:column!important}
+#scr-home .home-card .big{background-color:#edf5ed!important;border-radius:13px!important;box-shadow:none!important}
+#scr-home .card-name{font-size:17px!important;text-align:left!important;line-height:1.3!important;overflow:visible;display:block}
+#scr-home .card-sub{display:block!important;font-size:11px!important;color:#637672;line-height:1.4;text-align:left}
+#scr-home .home-progress{top:8px;right:8px;left:auto;bottom:auto;background:#f2eddc;color:#735f37;font-size:10px;box-shadow:none}
+#scr-home .home-card.recent{outline:2px solid #499987;outline-offset:-2px}
+.pn-songbtn,.stagechip,.brain-level-pick button{min-height:44px;border-radius:12px!important;box-shadow:0 2px 0 #b8c9c9!important}
+#scr-piano .pn-badge{color:#536879!important;background:#edf2f5!important;text-shadow:none!important}
+.brain-choice{border-radius:18px!important;border-width:2px!important;box-shadow:0 4px 0 #c6d7dd!important}
+.brain-panel{background:#fffdf9!important;border-color:#d1dfd8!important;box-shadow:0 8px 30px #27443b15!important}
+.art-side{border-radius:17px!important;background:#fafbf5!important}.art-side button{min-height:44px;border-radius:11px!important}
+.gallery-card{border-radius:16px!important;box-shadow:0 4px 0 #d9e1d7!important}.gallery-body{background:#f0f4ed}
+.settings-box{background:#fffdf7!important}.toolbar-scroll-cue{z-index:35;background:#edf4ee!important;border:1px solid #b8d3c6!important;color:#365d54!important;box-shadow:0 2px 8px #27443b22!important}
+.home-settings{background:#fffdf7!important;color:#345e5d!important;border:1px solid #cddbd4!important;box-shadow:0 3px 0 #d6e0d7!important}
+.home-net{position:static!important;align-self:flex-start;order:3;font-size:11px!important;background:transparent!important;color:#56716a!important;box-shadow:none!important;padding:0!important;pointer-events:none}
+.settings-box{max-height:90vh;overflow-y:auto!important;touch-action:pan-y}
+.full-backup{padding:14px;margin:12px 0;border:1px solid #bed8cc;border-radius:14px;background:#f1f8ef;color:#2d4f4e;line-height:1.6}.full-backup p{font-size:12px;margin:6px 0}.full-backup button{min-height:44px;margin:4px;padding:8px 12px;border:1px solid #a6c5bc;border-radius:10px;background:#fff;color:#274b50;font-weight:700}
+#scr-oekaki{background:#e6ebe8}#scr-oekaki #oe-tools{display:flex;flex-wrap:nowrap;overflow-x:auto;flex-shrink:0;gap:6px;padding:8px 12px;background:#f8faf5;border-bottom:1px solid #d3ddd8;touch-action:pan-x;min-height:66px}
+#oe-tools button{min-width:73px;padding:7px 10px;white-space:nowrap;border:1px solid #c9d7d0;border-radius:10px;background:#fff;color:#344d51;font-weight:700;font-size:13px}
+#oe-tools button[aria-pressed=true]{background:#287d7b;color:#fff;border-color:#287d7b}
+#oe-tools input[type=color]{width:44px;height:44px;flex-shrink:0;border:1px solid #cedbd4;background:#fff;border-radius:10px}
+#oe-tools label{display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:12px;color:#36524d}#oe-tools input[type=range]{width:95px}
+#oe-stage{position:relative;flex:1;min-height:0;overflow:hidden;background:#e4e9e6!important;background-image:radial-gradient(#bdcbc4 1px,transparent 1px)!important;background-size:18px 18px!important;box-shadow:none!important;border:1px solid #c6d3cc!important;border-radius:14px!important;margin:8px 12px!important}
+#oe-cv{width:100%;height:100%;display:block;touch-action:none}
+.studio-status{position:absolute;bottom:8px;left:10px;max-width:calc(100% - 20px);padding:6px 12px;background:#fffffff0;border:1px solid #d3e1d8;border-radius:9px;color:#3f6259;font-size:12px;pointer-events:none;z-index:2}
+.studio-panel{position:absolute;top:10px;right:10px;width:280px;max-width:90%;max-height:calc(100% - 54px);padding:14px;background:#fffdf7;overflow:auto;touch-action:pan-y;border:1px solid #c7d8cf;border-radius:16px;box-shadow:0 8px 30px #2f4a4433;z-index:5;color:#334f4d}
+.studio-panel button{min-height:42px;border:1px solid #d4dfd9;background:#f2f6ee;border-radius:9px;padding:6px 10px;margin:3px;font-size:13px;color:#334f4d}.studio-panel p{font-size:12px;line-height:1.6;margin:7px 0}.studio-panel label{display:block;font-size:13px;margin:10px 0}.studio-panel input[type=range]{width:100%;display:block;margin-top:5px}.studio-layer{display:flex;border-radius:9px;margin:4px 0}.studio-layer.selected{background:#d6ebe1}.studio-layer button:nth-child(2){flex:1;text-align:left}
+.studio-panel .oe-modebtn{display:inline-block}.studio-panel .studio-new{display:block;width:95%}#scr-oekaki>.topbar{overflow-x:auto}#scr-oekaki>.topbar .ttl{font-size:16px}#scr-oekaki>.topbar button{font-size:13px;padding:8px 10px}#scr-oekaki #oe-tools{border:0;border-radius:0;margin:0;box-shadow:none}
+.studio-overlay{position:fixed;inset:0;background:#203a47a8;z-index:150;display:flex;align-items:center;justify-content:center;padding:18px;touch-action:pan-y}
+.studio-dialog{width:min(660px,100%);max-height:94%;overflow:auto;padding:22px;background:#fcfaf4;border:1px solid #fff;border-radius:24px;box-shadow:0 20px 80px #172d4544;color:#30484b;touch-action:pan-y}
+.studio-dialog header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.studio-dialog h2{font-size:22px}.studio-dialog p{line-height:1.7;margin:12px 0;font-size:15px;white-space:pre-wrap}.studio-dialog button,.studio-dialog select{min-height:46px;padding:10px 14px;border:1px solid #bfd4cb;border-radius:11px;background:#edf5ee;color:#31564f;font-weight:700;margin:4px}
+.studio-dialog label{display:block;margin:12px 0;font-size:15px}.studio-dialog input,.studio-dialog textarea{display:block;width:100%;margin-top:7px;border:1px solid #b9cec3;border-radius:10px;background:white;color:#283f45;padding:12px;font-size:18px}.studio-dialog textarea{min-height:82px}.studio-card-preview{display:block;width:100%;max-height:36vh;object-fit:contain;background:white;border-radius:12px}
+.studio-book-dialog{width:min(920px,100%)}.studio-book{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:12px 0}.studio-book .studio-card{display:flex;flex-direction:column;margin:0;padding:10px;overflow:hidden;background:#fff9f1;border:5px solid #d78098;border-radius:14px;min-width:0;text-align:left;box-shadow:0 5px 0 #e3d5c6}.studio-card img{width:100%;aspect-ratio:4/3;object-fit:contain;background:#fff;border:1px solid #eadfd5;border-radius:5px}.studio-card strong{font-size:16px;margin:8px 0 4px;overflow-wrap:anywhere}.studio-card small{font-size:10px;color:#756b70}.studio-book .frame-sky{border-color:#7988c4;background:#f0f3ff}.studio-book .frame-rainbow{border-color:#78b6a6;background:#f3fff8}
+@media(orientation:portrait){#scr-home .home-card{padding:8px 10px!important}#scr-home .card-name{font-size:15px!important}#scr-home .card-sub{font-size:10px!important}.topbar .ttl{font-size:16px}.studio-book{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-height:580px){#scr-home{padding:8px!important;gap:6px!important}#scr-home .home-title{font-size:23px!important;padding:2px 0!important}#scr-home .home-sub{display:none!important}#scr-home .home-grid{gap:7px!important}#scr-home .home-card{padding:5px 9px!important;gap:3px!important}#scr-home .card-name{font-size:12px!important}#scr-home .card-sub{display:none!important}.screen>.topbar{min-height:54px;padding:5px 8px}.topbar button{min-height:42px;font-size:12px;padding:7px 9px}#scr-oekaki #oe-tools{min-height:55px;padding:5px}.studio-dialog{padding:14px}}
+@media(prefers-reduced-motion:reduce){button{transition:none}}

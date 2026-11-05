@@ -55,3 +55,13 @@ Author: Alexander Holm
 License: Creative Commons Attribution 3.0 (CC BY 3.0)
 https://sfzinstruments.github.io/pianos/salamander/
 https://creativecommons.org/licenses/by/3.0/
+
+日本地図パズルについて
+======================
+出典：地球地図日本（国土地理院）／Data of Japan
+https://github.com/dataofjapan/land
+元の japan.topojson を投影・簡略化して使用。沖縄の位置を別枠へ移動し、小島を省略しています。
+配布元の記載：非営利利用は出典元の明記。営利利用は出典元の明記と著作権者への利用報告。
+変換プログラム：build-map.py。元データ：japan-source.topojson。
+
+数ブロックの顔・装飾・色分け・体形は、ユーザーが提示した参考画像をもとにCanvasで描画しています。参考画像の写真ファイルは同梱していません。
