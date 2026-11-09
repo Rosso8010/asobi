@@ -20,6 +20,21 @@ let chrome,socket;const errors=[];
   const modes=await evaluate(`Object.keys(hooks)`);for(const mode of modes){await evaluate(`show(${JSON.stringify(mode)})`);await new Promise(r=>setTimeout(r,90));assert(await evaluate(`document.querySelector('#scr-'+cur).classList.contains('active')`));if(['keisan','brain','hiragana','piano','uta','koro'].includes(mode))await screenshot('mode-'+mode);}console.log('navigation',modes.length);const commonStart=await evaluate(`WORLD_CORE.read(localStorage).stars`);await evaluate(`for(const mode of ['kazu','koro','keisan','abc','hiragana','katakana','kanji','piano','calc','sampler','uta','oekaki','coloring','draw3d','gallery','collection','mofu'])PLAY_STARS.earn(mode,'smoke-milestone',1)`);assert.equal(await evaluate(`QUEST.state().stars`),commonStart+17);assert(await evaluate(`document.getElementById('shared-star-toast').textContent.includes('スペシャルスター')`));await evaluate(`PLAY_STARS.earn('kazu','smoke-milestone',1)`);assert.equal(await evaluate(`QUEST.state().stars`),commonStart+17);assert(await evaluate(`document.getElementById('shared-star-toast').textContent.includes('スペシャルスター')`));
   await evaluate(`show('oekaki')`);await new Promise(r=>setTimeout(r,400));await screenshot('studio-landscape');
   await evaluate(`showSavedImage(OE.pack().layers[0].image,true)`);await click('#save-close');assert(await evaluate(`document.querySelector('#save-ovl').classList.contains('hidden')`),'legacy image viewer cannot close');
+  for(const tool of ['line','circle','shapeStamp']){
+    await evaluate(`document.querySelector('[data-tool="${tool}"]').click()`);
+    const start=await evaluate(`(()=>{const r=document.querySelector('#oe-cv').getBoundingClientRect();return{x:r.x+r.width/2,y:r.y+r.height/2};})()`);
+    const before=await evaluate(`OE.pack().layers[2].image`);
+    await cdp('Input.dispatchMouseEvent',{type:'mousePressed',...start,button:'left',clickCount:1});
+    if(tool!=='shapeStamp'){
+      await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',x:start.x+35,y:start.y-20,buttons:1});
+      assert(await evaluate(`OE.pack().layers[2].image`)===before,'preview painted before release');
+    }
+    await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',x:start.x+(tool==='shapeStamp'?0:35),y:start.y,button:'left',clickCount:1});
+    assert(await evaluate(`OE.pack().layers[2].image`)!==before,tool+' did not draw');
+    await evaluate(`document.querySelector('#oe-undo').click()`);
+    assert(await evaluate(`OE.pack().layers[2].image`)===before,tool+' did not undo');
+  }
+  await evaluate(`document.querySelector('[data-tool=pen]').click()`);
   // Draw using actual pointer events, then save a card using actual form controls.
   const pos=await evaluate(`(()=>{const r=document.querySelector('#oe-cv').getBoundingClientRect();return{x:r.x+r.width*.45,y:r.y+r.height*.45};})()`);
   await cdp('Input.dispatchMouseEvent',{type:'mousePressed',...pos,button:'left',clickCount:1});for(let i=1;i<12;i++)await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',x:pos.x+i*7,y:pos.y+Math.sin(i)*20,button:'left',buttons:1});await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',x:pos.x+77,y:pos.y,button:'left',clickCount:1});

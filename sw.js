@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v111-card-kana-dictionary-20261109';
+var CACHE = 'asobi-v112-drawing-shapes-20261109';
 var ASSETS = [
   './',
   './index.html',
