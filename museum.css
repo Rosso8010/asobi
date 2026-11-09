@@ -16,3 +16,27 @@
 .gacha-room,.museum-room{overflow-anchor:none}.complete-skeleton{height:340px;max-height:42vh;object-fit:contain;background:#142e33}
 
 .studio-card img{height:clamp(130px,20vh,180px)}.studio-empty-pocket{display:flex;align-items:center;justify-content:center;min-height:160px;border:1px solid #ffffffda;border-radius:6px;background:linear-gradient(135deg,#ffffff70,#ffffff0a);box-shadow:inset 1px 1px 4px #fff,0 2px 5px #68593c25;color:#b8a67b;font-size:32px}@media(orientation:portrait){.studio-card img{height:clamp(145px,19vh,195px)}}
+.museum-pref-actions{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:14px;border:1px solid #e3c576;border-radius:16px;margin-top:12px;background:#153f4b}.museum-pref-actions strong{font-size:23px}.museum-pref-actions span{font-size:16px;color:#f3dcaa}.museum-pref-note{text-align:center;font-size:14px}.museum-showcase.japan select{display:block;margin:10px auto;padding:10px;border:1px solid #d4ba7d;border-radius:10px;max-width:100%;min-height:44px;font-size:16px;color:#294b54;background:#fff7db}.collection-map [role=button]{cursor:pointer}.collection-map [role=button]:focus{outline:none;stroke:#e2a02d;stroke-width:4}.map-success-card{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;max-width:520px;margin:12px auto;padding:18px;border:3px solid #eacb69;border-radius:25px;background:radial-gradient(#fff9da,#e4f2df);box-shadow:0 0 28px #f5d67d55;animation:map-fit-pop .4s ease-out}.map-success-badge{font-size:20px;font-weight:bold;color:#9b6b26}.map-success-card .exhibit-art{width:110px;height:110px;background:transparent}.map-success-name{font-size:clamp(32px,6vw,52px);color:#2d6264}.map-success-reading{font-size:clamp(22px,4vw,29px);color:#456b74}.map-success-card button{min-height:42px;padding:8px 17px;border:1px solid #6da1a2;border-radius:13px;background:#fffef6;color:#2e6266;font-size:16px}.map-result-scene{display:none!important}@keyframes map-fit-pop{from{transform:scale(.88);opacity:.4}to{transform:none;opacity:1}}@media(prefers-reduced-motion:reduce){.map-success-card{animation:none}}
+
+/* Preserve the square frame of each machine in the three-panel atlas. */
+.gacha-stage{width:min(380px,100%);height:auto;aspect-ratio:1}
+.gacha-custom-machine{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:24%;background:radial-gradient(circle at 50% 34%,#fff4bb 0 16%,#6dc3ae 17% 32%,#334771 33% 50%,#131d38 51%);border:4px solid #deae67}
+.theme-kanji .gacha-custom-machine{background:radial-gradient(circle at 50% 34%,#fff4bb 0 16%,#cc8374 17% 32%,#703657 33% 50%,#2e1e38 51%)}
+.gacha-custom-machine span{font:bold clamp(50px,12vw,95px) serif;color:#53293f}
+.gacha-custom-machine strong{color:#fff7ce;text-shadow:0 2px 5px #000}
+.gacha-stage.spinning::after,.gacha-stage.capsule-ready::after{content:'';position:absolute;inset:0;border-radius:22px;pointer-events:none;background:radial-gradient(circle,#fff6a900 32%,#ffe38988 100%);animation:gacha-glow .75s ease-in-out infinite alternate}
+.gacha-handle,.gacha-capsule{z-index:1}
+.capsule-reveal .exhibit-art{animation:prize-glow .85s ease-out}
+.exhibit-art.kanji,.exhibit-art.zodiac{display:grid;align-content:center;justify-items:center;background:radial-gradient(ellipse,#713c57,#25162d);color:#fff1bf;font:700 clamp(22px,7vw,76px)/1.05 serif}
+.exhibit-art.zodiac{background:radial-gradient(ellipse,#3b8e77,#15243e);font-size:clamp(18px,4vw,42px)}
+.zodiac-icon{font-size:1.2em}
+.exhibit-art.rare-exhibit{background:radial-gradient(ellipse,#a6539c,#392358);box-shadow:inset 0 0 0 3px #f9d469,0 0 16px #e7c56d}
+@keyframes gacha-glow{from{opacity:.15}to{opacity:1}}
+@keyframes prize-glow{0%{transform:scale(.78);filter:brightness(2.5)}65%{transform:scale(1.06)}}
+@media(prefers-reduced-motion:reduce){.gacha-stage.spinning::after,.gacha-stage.capsule-ready::after,.capsule-reveal .exhibit-art{animation:none}}
+
+.capsule-opening .gacha-capsule{animation:capsule-open .43s ease-in forwards}
+.capsule-opening::after{background:radial-gradient(circle at 50% 76%,#fff8ca 0%,#ffdd8470 29%,transparent 65%)}
+@keyframes capsule-open{0%{opacity:1;transform:scale(1)}55%{opacity:1;transform:rotate(-10deg) scale(1.22);filter:brightness(1.5)}100%{opacity:0;transform:scale(1.6);filter:brightness(2.8)}}
+@media(prefers-reduced-motion:reduce){.capsule-opening .gacha-capsule{animation:none}}
+.gacha-custom-machine strong{position:absolute;bottom:15%;left:0;right:0;text-align:center}

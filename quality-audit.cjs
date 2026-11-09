@@ -97,7 +97,7 @@ if(!/function rankFor\(total\)[\s\S]*?リズムの ほうせき/.test(html))erro
 if(!/function saveResult\(total,rank\)[\s\S]*?updateSongBadges/.test(html))errors.push('piano result does not update song badges');
 if(!/var answerPreview=b;[\s\S]*?brain-explain-answer/.test(html))errors.push('brain explanation does not retain the correct visual answer');
 if(!/sfx\('pop'\);b\.disabled=true[\s\S]*?つに しぼれたよ/.test(html))errors.push('brain retry does not narrow choices gently');
-if(!/APP_VERSION='2026\.11\.05-size-choice-fix'/.test(html))errors.push('visible app version is stale');
+if(!/APP_VERSION='2026\.11\.09-daily-gacha'/.test(html))errors.push('visible app version is stale');
 if(!/k\.indexOf\('asobi-'\)\s*===\s*0\s*&&\s*k\s*!==\s*CACHE/.test(sw))errors.push('main service worker can delete sibling app caches');
 if(/c\.put\('\.\/index\.html',\s*copy\)/.test(sw))errors.push('main service worker can overwrite the app shell with a child page');
 if(!/new Response\('',\s*\{\s*status:\s*504/.test(sw))errors.push('main service worker returns HTML when an offline asset is missing');
@@ -203,7 +203,7 @@ function readLiteral(label,re){
 }
 const content={};
 const grade1='一右雨円王音下火花貝学気九休玉金空月犬見五口校左三山子四糸字耳七車手十出女小上森人水正生青夕石赤千川先早草足村大男竹中虫町天田土二日入年白八百文木本名目立力林六'.split('');
-const kanjiItems=readLiteral('kanji items',/var KJ=\(function\(\)\{\s*var ks=(\[[\s\S]*?\]);\s*var items=ks\.map/);
+const kanjiItems=require('./world-core.js').kanji.concat([['小林 楽','こばやし らく',true]]);
 const kanjiStrokes=readLiteral('kanji strokes',/var KANJI_STROKES=(\{[\s\S]*?\});\s*\/\* KANJIVG_DATA_END/);
 const kanaRows=readLiteral('kana rows',/var KANA_ROWS=(\[[\s\S]*?\]);\s*function makeKanaMode/);
 const kanaStrokes=readLiteral('kana strokes',/var KANA_STROKES=(\{[\s\S]*?\});\s*\/\* =+ なぞり書き/);
