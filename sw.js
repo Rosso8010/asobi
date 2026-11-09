@@ -1,10 +1,13 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v96-size-choice-fix-20261105';
+var CACHE = 'asobi-v101-daily-gacha-20261109';
 var ASSETS = [
   './',
   './index.html',
   './world-core.js',
   './play-stars.js',
+  './clock-game.js',
+  './clock-game.css',
+  './clock-workshop.webp',
   './rush-experience.css',
   './minigame-preview.html',
   './number-art.js',
@@ -12,7 +15,6 @@ var ASSETS = [
   './museum.js',
   './museum.css',
   './museum-room.webp',
-  './museum-delivery.webp',
   './museum-skeleton.webp',
   './museum-machines.webp',
   './museum-planets.webp',

@@ -22,8 +22,8 @@ const ninety=C.defaultCells(90),ncolors=ninety.map((p,i)=>A.cellColor(90,i,p,nin
 const hundred=C.defaultCells(100),hcolors=hundred.map((p,i)=>A.cellColor(100,i,p,hundred));assert.equal(new Set(hcolors).size,2);for(const color of new Set(hcolors))assert.equal(hcolors.filter(c=>c===color).length,50);for(let i=0;i<100;i++){if(i%10<9)assert.notEqual(hcolors[i],hcolors[i+1]);if(i<90)assert.notEqual(hcolors[i],hcolors[i+10]);}
 console.log('PASS 90: three 30-cell bands; 100: 50/50 checkerboard');
 
-{let data=null;const storage={getItem(){return data},setItem(k,v){data=v}};C.update(storage,s=>{s.stars=400;s.owned.push('jp-15')});const old=C.read(storage);assert.deepEqual(old.exhibits,[]);
- const result=C.capsule(storage,'planet','capsule:first',()=>0);assert.equal(result.id,'planet-1');assert.equal(C.read(storage).stars,380);assert.deepEqual(C.capsule(storage,'planet','capsule:first',()=>.9),result);assert.equal(C.read(storage).stars,380);
+{let data=null;const storage={getItem(){return data},setItem(k,v){data=v}};C.update(storage,s=>{s.stars=900;s.owned.push('jp-15')});const old=C.read(storage);assert.deepEqual(old.exhibits,[]);
+ const result=C.capsule(storage,'planet','capsule:first',()=>0);assert.equal(result.id,'planet-1');assert.equal(C.read(storage).stars,880);assert.deepEqual(C.capsule(storage,'planet','capsule:first',()=>.9),result);assert.equal(C.read(storage).stars,880);
  for(let i=2;i<=8;i++)C.capsule(storage,'planet','capsule:p'+i,()=>0);assert.equal(C.read(storage).exhibits.length,8);const replay=data;assert.throws(()=>C.capsule(storage,'planet','capsule:first',()=>0));assert.equal(data,replay);const full=data;assert.throws(()=>C.capsule(storage,'planet','capsule:full',()=>0));assert.equal(data,full);
  for(let i=1;i<=6;i++)C.capsule(storage,'fossil','capsule:f'+i,()=>0);assert.equal(C.read(storage).exhibits.length,14);assert(C.read(storage).owned.includes('jp-15'));
  const before=data;assert.throws(()=>C.capsule({getItem:()=>data,setItem(){throw Error('quota')}},'japan','capsule:quota',()=>0));assert.equal(data,before);
@@ -37,3 +37,36 @@ console.log('PASS history reset preserves wallet, collections and settings; 87-i
 
 {const data=new Map([['asobi-clear','[true]']]),store={getItem:k=>data.has(k)?data.get(k):null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};C.update(store,s=>s.stars=33);const old=new Map(data);let failed=false;const throwing={getItem:store.getItem,setItem:store.setItem,removeItem(k){if(!failed&&k==='asobi-clear'){failed=true;throw Error('write failure')}store.removeItem(k)}};assert.throws(()=>C.resetHistory(throwing));assert.deepEqual(data,old);}
 console.log('PASS failed reset restores prior history and wallet');
+
+{
+  const core=require('./world-core.js');
+  const data=new Map();
+  const storage={getItem:key=>data.get(key)||null,setItem:(key,value)=>data.set(key,value)};
+  core.update(storage,state=>{state.stars=100;});
+  assert.equal(core.kanji.length,81);
+  assert.equal(core.zodiac.length,12);
+  assert.equal(core.capsule(storage,'kanji','capsule:rare',()=>.019).id,'kanji-81');
+  assert.equal(core.capsule(storage,'kanji','capsule:common',()=>0).id,'kanji-1');
+  assert.equal(core.capsule(storage,'zodiac','capsule:zodiac',()=>.999).id,'zodiac-12');
+  assert.deepEqual(core.read(storage).exhibits,['kanji-81','kanji-1','zodiac-12']);
+  assert.equal(core.read(storage).stars,25);
+}
+
+{
+ const data=new Map(),store={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};
+ C.update(store,s=>{s.stars=100;});
+ assert.equal(C.capsuleCost(C.read(store)),20);
+ C.capsule(store,'japan','capsule:today',()=>0,20);
+ assert.equal(C.capsuleCost(C.read(store)),25);
+ assert.throws(()=>C.capsule(store,'planet','capsule:stale',()=>0,20));
+ assert.equal(C.read(store).stars,80);
+ C.capsule(store,'planet','capsule:second',()=>0,25);
+ assert.equal(C.capsuleCost(C.read(store)),30);
+ const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+ C.update(store,s=>{s.capsuleDaily.day=[yesterday.getFullYear(),yesterday.getMonth()+1,yesterday.getDate()].join('-');});
+ assert.equal(C.capsuleCost(C.read(store)),20);
+ C.capsule(store,'fossil','capsule:tomorrow',()=>0,20);
+ assert.equal(C.read(store).stars,35);
+ assert.equal(C.capsuleCost(C.read(store)),25);
+ console.log('PASS shared daily price, stale quote rejection and next-day reset');
+}
