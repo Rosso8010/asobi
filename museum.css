@@ -95,3 +95,9 @@
 .studio-reveal-playing .studio-reveal-card{animation:studio-card-spin 1.45s .68s cubic-bezier(.2,.7,.25,1) both,studio-foil-shine .65s 2.16s ease-in-out}
 @keyframes studio-foil-shine{50%{filter:brightness(1.3) drop-shadow(0 0 14px #ffd375)}}
 @media(prefers-reduced-motion:reduce){.studio-reveal-playing .studio-reveal-card{animation:none}}
+
+.studio-kana{margin:8px 0 12px}
+.studio-kana summary{padding:8px 0;font-weight:bold}
+.studio-kana-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.studio-dialog .studio-kana-grid button{min-height:39px;padding:4px;margin:0}
+.studio-kana-actions{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}

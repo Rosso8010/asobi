@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v108-special-star-20261109';
+var CACHE = 'asobi-v109-card-kana-20261109';
 var ASSETS = [
   './',
   './index.html',
