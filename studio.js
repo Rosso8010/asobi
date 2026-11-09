@@ -180,12 +180,27 @@
     function saveWork(meta,updateCard){workChain=workChain.catch(function(){}).then(function(){if(!ready)throw new Error('読み込み中です');commitSelection();var p=pack(),c=composite(),img=c.toDataURL('image/png');p.card=meta||null;return (p.card&&!p.card.number?ASOBI_BACKUP.nextCardNumber().then(function(n){p.card.number=n;}):Promise.resolve()).then(function(){var id=(updateCard||(!meta&&!cardMeta))&&artId||Date.now()+'-'+Math.floor(Math.random()*1000000);p.artId=id;var row={id:id,at:Date.now(),kind:'free',title:p.card?p.card.name:'じゆうおえかき',img:img,payload:p};return window.ASOBI_BACKUP.putWork(row).then(function(){artId=id;cardMeta=p.card;editingCard=false;revision++;return saveDraft();}).then(function(){return row;});});});return workChain;}
     function dialog(title){var ov=document.createElement('div');ov.className='studio-overlay';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label',title);var box=document.createElement('section');box.className='studio-dialog';var head=document.createElement('header'),h=document.createElement('h2');h.textContent=title;head.appendChild(h);var previous=document.activeElement;function close(){ov.remove();document.removeEventListener('keydown',key);if(previous&&previous.focus)previous.focus();}head.appendChild(button('× とじる',close));box.appendChild(head);ov.appendChild(box);document.body.appendChild(ov);function key(e){if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();close();}if(e.key==='Tab'){var a=Array.prototype.slice.call(box.querySelectorAll('button,input,textarea,select')).filter(function(x){return !x.disabled;});if(!a.length)return;if(e.shiftKey&&document.activeElement===a[0]){a[a.length-1].focus();e.preventDefault();}else if(!e.shiftKey&&document.activeElement===a[a.length-1]){a[0].focus();e.preventDefault();}}}document.addEventListener('keydown',key);head.querySelector('button').focus();return{box:box,close:close,overlay:ov};}
     function confirmDialog(title,text,fn,confirmLabel){var d=dialog(title),p=document.createElement('p');p.textContent=text;d.box.appendChild(p);var yes=button(confirmLabel||'保存して はじめる',function(){yes.disabled=true;Promise.resolve().then(fn).then(d.close).catch(function(e){p.textContent=e.message;yes.disabled=false;});});d.box.appendChild(yes);}
-    function addNameKeys(name){
+    var kanaDictionary=null,kanaDictionaryRequest;
+    function loadKanaDictionary(){
+      if(!kanaDictionaryRequest)kanaDictionaryRequest=fetch('studio-kana-dictionary.json').then(function(response){
+        if(!response.ok)throw new Error('辞書を読み込めません');
+        return response.json();
+      }).then(function(data){kanaDictionary=data;return data;}).catch(function(){kanaDictionaryRequest=null;return null;});
+      return kanaDictionaryRequest;
+    }
+    function addKanaKeys(name){
       var keys=document.createElement('details'),summary=document.createElement('summary'),grid=document.createElement('div'),actions=document.createElement('div'),choices=document.createElement('div');
-      keys.className='studio-kana';keys.open=true;summary.textContent='あいうえおキーボード';keys.appendChild(summary);
+      keys.className='studio-kana';summary.textContent='あいうえおキーボード';keys.appendChild(summary);
       grid.className='studio-kana-grid';actions.className='studio-kana-actions';choices.className='studio-kana-actions';choices.setAttribute('aria-label','変換候補');
       keys.appendChild(grid);keys.appendChild(actions);keys.appendChild(choices);
       name.parentNode.after(keys);
+      name.inputMode='none';
+      function openKeys(){
+        Array.from(name.closest('.studio-dialog').querySelectorAll('.studio-kana')).forEach(function(other){other.open=other===keys;});
+        loadKanaDictionary();
+      }
+      name.addEventListener('focus',openKeys);
+      name.addEventListener('click',openKeys);
       var words={'なまえ':['名前'],'そら':['空'],'ほし':['星'],'にじ':['虹'],'ねこ':['猫'],'いぬ':['犬'],'うさぎ':['兎'],'りゅう':['竜','龍'],'きょうりゅう':['恐竜'],'でんしゃ':['電車'],'ひこうき':['飛行機'],'くるま':['車'],'おうち':['お家'],'あそび':['遊び'],'たのしい':['楽しい']};
       WORLD_CORE.kanji.forEach(function(pair){var list=words[pair[1]]||(words[pair[1]]=[]);if(list.indexOf(pair[0])<0)list.push(pair[0]);});
       var position=name.value.length,end=position,extra=false;
@@ -197,33 +212,53 @@
       }
       function showKeys(){
         grid.replaceChildren();
-        Array.from(extra?'がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉゃゅょっー':'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん').forEach(function(ch){
-          grid.appendChild(button(ch,function(){replace(ch,position,end);}));
+        var columns=extra?['がぎぐげご','ざじずぜぞ','だぢづでど','ばびぶべぼ','ぱぴぷぺぽ','ぁぃぅぇぉ','ゃ ゅ ょ','っー   ']:['あいうえお','かきくけこ','さしすせそ','たちつてと','なにぬねの','はひふへほ','まみむめも','や ゆ よ','らりるれろ','わ を ん'];
+        columns.forEach(function(column,index){
+          Array.from(column).forEach(function(ch,row){
+            if(ch===' ')return;
+            var key=button(ch,function(){replace(ch,position,end);});
+            key.style.gridColumn=10-index;key.style.gridRow=row+1;grid.appendChild(key);
+          });
         });
       }
       function convert(){
-        var match=name.value.slice(0,position).match(/[ぁ-ゖー]+$/);
+        var selected=name.value.slice(position,end),match=selected?selected.match(/^[ぁ-ゖー]+$/):name.value.slice(0,position).match(/[ぁ-ゖー]+$/);
         if(!match)return false;
-        var text=match[0],start=position-text.length,stop=position;
-        var kata=text.replace(/[ぁ-ゖ]/g,function(ch){return String.fromCharCode(ch.charCodeAt(0)+96);});
-        choices.replaceChildren();
-        (words[text]||[]).concat([kata]).forEach(function(word){
-          if(word===text)return;
-          choices.appendChild(button(word,function(){replace(word,start,stop);}));
+        var reading=match[0],from=selected?position:position-reading.length,to=end,snapshot=name.value,cursor=position;
+        function renderCandidates(){
+          var text=reading,start=from;
+          function lookup(k){return (words[k]||[]).concat(kanaDictionary&&kanaDictionary[k]||[]);}
+          var found=lookup(text);
+          if(!found.length&&!selected){
+            for(var i=1;i<reading.length-1;i++){
+              found=lookup(reading.slice(i));
+              if(found.length){text=reading.slice(i);start=from+i;break;}
+            }
+          }
+          var kata=text.replace(/[ぁ-ゖ]/g,function(ch){return String.fromCharCode(ch.charCodeAt(0)+96);});
+          choices.replaceChildren();
+          Array.from(new Set(found.concat([kata]))).slice(0,10).forEach(function(word){
+            if(word!==text)choices.appendChild(button(word,function(){replace(word,start,to);}));
+          });
+        }
+        renderCandidates();
+        if(!kanaDictionary)loadKanaDictionary().then(function(data){
+          if(data&&keys.open&&name.value===snapshot&&position===cursor&&end===to&&choices.children.length)renderCandidates();
         });
-        return choices.children.length>0;
+        return true;
       }
       actions.appendChild(button('が・ゃ・っ',function(){extra=!extra;showKeys();this.textContent=extra?'あ・い・う':'が・ゃ・っ';}));
       actions.appendChild(button('⌫ けす',function(){replace('',position===end?Math.max(0,position-1):position,end);}));
       actions.appendChild(button('スペース／変換',function(){if(!convert())replace(' ',position,end);}));
       actions.appendChild(button('空白',function(){replace(' ',position,end);}));
-      actions.appendChild(button('端末キーボード',function(){name.focus();}));
+      ['、','。'].forEach(function(ch){actions.appendChild(button(ch,function(){replace(ch,position,end);}));});
+      actions.appendChild(button('端末キーボード',function(){name.inputMode='text';name.blur();name.focus();}));
       name.addEventListener('keydown',function(e){
         if(e.key===' '&&!e.isComposing&&e.keyCode!==229){capture();if(convert())e.preventDefault();}
       });
       showKeys();
     }
-    function editCard(){var previous=editingCard?cardMeta:null,d=dialog(previous?'カードを編集':'じぶんの カードをつくる'),preview=document.createElement('img');preview.src=composite().toDataURL();preview.className='studio-card-preview';d.box.appendChild(preview);function field(label,tag,max,value){var l=document.createElement('label');l.textContent=label;var e=document.createElement(tag);e.maxLength=max;e.value=value||'';l.appendChild(e);d.box.appendChild(l);return e;}var name=field('なまえ（あとでもOK）','input',40,previous&&previous.name),description=field('どんなもの？','textarea',180,previous&&previous.description),frame=document.createElement('select');frame.setAttribute('aria-label','カードのわく');var frames=[['berry','いちご'],['sky','ほしぞら'],['rainbow','にじ']];[['auto','🎲 おまかせ']].concat(frames).forEach(function(a){var o=document.createElement('option');o.value=a[0];o.textContent=a[1];frame.appendChild(o);});frame.value=previous?previous.frame:'auto';d.box.appendChild(frame);var message=document.createElement('p');message.textContent='名前はあとから変えられます。絵はそのまま残ります。';d.box.appendChild(message);var save=button(previous?'✓ カードを更新':'✓ カードちょうに しまう',function(){save.disabled=true;saveWork({name:name.value.trim()||'ななしのカード',description:description.value.trim(),frame:frame.value==='auto'?frames[Math.floor(Math.random()*frames.length)][0]:frame.value,number:previous&&previous.number,createdAt:previous&&previous.createdAt||Date.now()},!!previous).then(function(row){d.close();celebrateCard(row);note('✓ カードができた！');}).catch(function(e){message.textContent=e.message;save.disabled=false;});});d.box.appendChild(save);addNameKeys(name);}
+    function editCard(){var previous=editingCard?cardMeta:null,d=dialog(previous?'カードを編集':'じぶんの カードをつくる'),preview=document.createElement('img');preview.src=composite().toDataURL();preview.className='studio-card-preview';d.box.appendChild(preview);function field(label,tag,max,value){var l=document.createElement('label');l.textContent=label;var e=document.createElement(tag);e.maxLength=max;e.value=value||'';l.appendChild(e);d.box.appendChild(l);return e;}var name=field('なまえ（あとでもOK）','input',40,previous&&previous.name),description=field('どんなもの？','textarea',180,previous&&previous.description),frame=document.createElement('select');frame.setAttribute('aria-label','カードのわく');var frames=[['berry','いちご'],['sky','ほしぞら'],['rainbow','にじ']];[['auto','🎲 おまかせ']].concat(frames).forEach(function(a){var o=document.createElement('option');o.value=a[0];o.textContent=a[1];frame.appendChild(o);});frame.value=previous?previous.frame:'auto';d.box.appendChild(frame);var message=document.createElement('p');message.textContent='名前はあとから変えられます。絵はそのまま残ります。';d.box.appendChild(message);var save=button(previous?'✓ カードを更新':'✓ カードちょうに しまう',function(){save.disabled=true;saveWork({name:name.value.trim()||'ななしのカード',description:description.value.trim(),frame:frame.value==='auto'?frames[Math.floor(Math.random()*frames.length)][0]:frame.value,number:previous&&previous.number,createdAt:previous&&previous.createdAt||Date.now()},!!previous).then(function(row){d.close();celebrateCard(row);note('✓ カードができた！');}).catch(function(e){message.textContent=e.message;save.disabled=false;});});d.box.appendChild(save);addKanaKeys(name);addKanaKeys(description);}
     var examples=[{name:'いちごドラゴン',description:'いちごをたべると、ピンクのひをはく。',frame:'berry',sample:0},{name:'そらとぶおうち',description:'よるになると、おつきさまへあそびにいく。',frame:'sky',sample:1},{name:'にじジュース',description:'のむと、すきないろのくもにのれる。',frame:'rainbow',sample:2}];
     function sampleArt(i){var c=canvas(),x=c.getContext('2d');x.fillStyle=['#fff3df','#e9f5ff','#fff5f5'][i];x.fillRect(0,0,WIDTH,HEIGHT);x.lineWidth=9;x.lineJoin='round';x.lineCap='round';function shape(points,fill){x.beginPath();points.forEach(function(p,j){if(j)x.lineTo(p[0],p[1]);else x.moveTo(p[0],p[1]);});x.closePath();x.fillStyle=fill;x.fill();x.strokeStyle='#654d65';x.stroke();}function oval(px,py,rx,ry,fill){x.beginPath();x.ellipse(px,py,rx,ry,.03,0,Math.PI*2);x.fillStyle=fill;x.fill();x.strokeStyle='#654d65';x.stroke();}
       if(i===0){shape([[343,440],[215,295],[398,350]],'#ffb5ad');shape([[590,402],[714,245],[690,473]],'#ffb5ad');oval(510,480,175,146,'#ee6e80');oval(620,300,123,109,'#ef7786');shape([[555,220],[570,139],[613,202]],'#f5c24d');shape([[665,203],[721,151],[710,246]],'#f5c24d');shape([[367,501],[217,565],[398,565]],'#ef7786');oval(472,496,83,105,'#ffd8a8');oval(575,606,52,25,'#ef7786');oval(425,604,52,24,'#ef7786');oval(584,286,10,14,'#3e3546');oval(665,283,10,14,'#3e3546');x.beginPath();x.arc(626,312,32,.1,Math.PI-.1);x.stroke();shape([[761,326],[812,285],[806,339],[863,320],[822,378]],'#ff98c2');}

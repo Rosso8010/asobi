@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v109-card-kana-20261109';
+var CACHE = 'asobi-v111-card-kana-dictionary-20261109';
 var ASSETS = [
   './',
   './index.html',
@@ -23,7 +23,7 @@ var ASSETS = [
   './japan-map.js',
   './redesign.css',
   './redesign.js',
-  './studio.js','./studio-card-sparkle.webp','./studio-card-filigree.webp',
+  './studio.js','./studio-kana-dictionary.json','./studio-kana-dictionary-LICENSE.txt','./studio-card-sparkle.webp','./studio-card-filigree.webp',
   './backup.js',
   './manifest.webmanifest',
   './icon-180.png',

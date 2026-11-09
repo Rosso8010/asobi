@@ -98,6 +98,6 @@
 
 .studio-kana{margin:8px 0 12px}
 .studio-kana summary{padding:8px 0;font-weight:bold}
-.studio-kana-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
-.studio-dialog .studio-kana-grid button{min-height:39px;padding:4px;margin:0}
+.studio-kana-grid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px}
+.studio-dialog .studio-kana-grid button{min-height:42px;min-width:0;padding:2px 0;margin:0}
 .studio-kana-actions{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}

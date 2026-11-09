@@ -97,7 +97,7 @@ if(!/function rankFor\(total\)[\s\S]*?リズムの ほうせき/.test(html))erro
 if(!/function saveResult\(total,rank\)[\s\S]*?updateSongBadges/.test(html))errors.push('piano result does not update song badges');
 if(!/var answerPreview=b;[\s\S]*?brain-explain-answer/.test(html))errors.push('brain explanation does not retain the correct visual answer');
 if(!/sfx\('pop'\);b\.disabled=true[\s\S]*?つに しぼれたよ/.test(html))errors.push('brain retry does not narrow choices gently');
-if(!/APP_VERSION='2026\.11\.09-card-kana'/.test(html))errors.push('visible app version is stale');
+if(!/APP_VERSION='2026\.11\.09-card-kana-dictionary'/.test(html))errors.push('visible app version is stale');
 if(!/k\.indexOf\('asobi-'\)\s*===\s*0\s*&&\s*k\s*!==\s*CACHE/.test(sw))errors.push('main service worker can delete sibling app caches');
 if(/c\.put\('\.\/index\.html',\s*copy\)/.test(sw))errors.push('main service worker can overwrite the app shell with a child page');
 if(!/new Response\('',\s*\{\s*status:\s*504/.test(sw))errors.push('main service worker returns HTML when an offline asset is missing');
