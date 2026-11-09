@@ -1,5 +1,5 @@
 /* あそびのくに offline cache */
-var CACHE = 'asobi-v101-daily-gacha-20261109';
+var CACHE = 'asobi-v108-special-star-20261109';
 var ASSETS = [
   './',
   './index.html',
@@ -16,14 +16,14 @@ var ASSETS = [
   './museum.css',
   './museum-room.webp',
   './museum-skeleton.webp',
-  './museum-machines.webp',
+  './museum-machines.webp','./museum-machines-kanji-zodiac.webp',
   './museum-planets.webp',
   './museum-fossils.webp',
   './quest.css',
   './japan-map.js',
   './redesign.css',
   './redesign.js',
-  './studio.js',
+  './studio.js','./studio-card-sparkle.webp','./studio-card-filigree.webp',
   './backup.js',
   './manifest.webmanifest',
   './icon-180.png',

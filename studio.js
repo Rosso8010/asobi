@@ -22,9 +22,9 @@
     function snapshot(){return {layers:layers.map(function(l){var c=canvas();c.getContext('2d').drawImage(l.canvas,0,0);return {name:l.name,visible:l.visible,opacity:l.opacity,canvas:c};}),active:active};}
     function remember(){if(busy||!ready)return;history.push(snapshot());if(history.length>6)history.shift();future=[];updateButtons();}
     function restore(s){layers=s.layers;active=s.active;selection=null;floating=null;render();layerUI();changed();}
-    function changed(){revision++;render();updateButtons();clearTimeout(saveTimer);saveTimer=setTimeout(saveDraft,650);note('✎ へんこうあり · じどうほぞんします');}
+    function changed(){queueCardGlow();revision++;render();updateButtons();clearTimeout(saveTimer);saveTimer=setTimeout(saveDraft,650);note('✎ へんこうあり · じどうほぞんします');}
     function saveDraft(){clearTimeout(saveTimer);if(!ready)return Promise.resolve();commitSelection();if(savedRevision===revision)return saveChain;var data=pack(),r=revision;saveChain=saveChain.catch(function(){}).then(function(){return draftIO(data);}).then(function(){savedRevision=r;note(revision===r?'✓ したがき ほぞんずみ':'✎ つづきを ほぞんします');}).catch(function(){note('保存できません。バックアップで外に残してください');throw new Error('下書きの保存に失敗しました');});saveChain.catch(function(){});return saveChain;}
-    function composite(transparent){var c=canvas(),x=c.getContext('2d');if(!transparent){x.fillStyle='#fff';x.fillRect(0,0,WIDTH,HEIGHT);}layers.forEach(function(l){if(l.visible){x.globalAlpha=l.opacity;x.drawImage(l.canvas,0,0);}});x.globalAlpha=1;return c;}
+    function composite(){var c=canvas(),x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,WIDTH,HEIGHT);layers.forEach(function(l){if(l.visible){x.globalAlpha=l.opacity;x.drawImage(l.canvas,0,0);}});x.globalAlpha=1;return c;}
     function fit(){var r=stage.getBoundingClientRect();return Math.min((r.width-32)/WIDTH,(r.height-58)/HEIGHT)*zoom;}
     function render(){if(!layers.length)return;var r=stage.getBoundingClientRect();if(!r.width||!r.height)return;var d=Math.min(devicePixelRatio||1,1.5);if(view.width!==Math.round(r.width*d)||view.height!==Math.round(r.height*d)){view.width=Math.round(r.width*d);view.height=Math.round(r.height*d);}vctx.setTransform(d,0,0,d,0,0);vctx.clearRect(0,0,r.width,r.height);vctx.save();vctx.translate(r.width/2+pan.x,r.height/2+pan.y);vctx.rotate(angle);var s=fit();vctx.scale(s,s);vctx.translate(-WIDTH/2,-HEIGHT/2);vctx.fillStyle='#fff';vctx.fillRect(0,0,WIDTH,HEIGHT);layers.forEach(function(l){if(l.visible){vctx.globalAlpha=l.opacity;vctx.drawImage(l.canvas,0,0);}});vctx.globalAlpha=1;if(floating){vctx.save();vctx.translate(floating.x+floating.w/2,floating.y+floating.h/2);vctx.rotate(floating.angle);vctx.drawImage(floating.canvas,-floating.w/2,-floating.h/2,floating.w,floating.h);vctx.restore();}if(selection){vctx.strokeStyle='#3259b8';vctx.lineWidth=2/s;vctx.setLineDash([8/s,5/s]);vctx.strokeRect(selection.x,selection.y,selection.w,selection.h);}vctx.restore();}
     function point(e){var r=view.getBoundingClientRect(),x=e.clientX-r.left-r.width/2-pan.x,y=e.clientY-r.top-r.height/2-pan.y,s=fit(),co=Math.cos(-angle),si=Math.sin(-angle);return{x:(x*co-y*si)/s+WIDTH/2,y:(x*si+y*co)/s+HEIGHT/2};}
@@ -33,28 +33,69 @@
     function lift(){if(!selection||floating)return;var r=selection;if(r.w<2||r.h<2)return;var c=canvas(Math.ceil(r.w),Math.ceil(r.h));c.getContext('2d').drawImage(current().canvas,r.x,r.y,r.w,r.h,0,0,c.width,c.height);current().canvas.getContext('2d').clearRect(r.x,r.y,r.w,r.h);floating={canvas:c,x:r.x,y:r.y,w:r.w,h:r.h,angle:0};}
     function brush(a,b){var x=current().canvas.getContext('2d');x.save();if(tool==='stamp'){if(lastStamp&&Math.hypot(b.x-lastStamp.x,b.y-lastStamp.y)<Math.max(30,size*2)){x.restore();return;}x.globalAlpha=opacity;x.font=Math.max(32,size*3)+'px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(stamp,b.x,b.y);lastStamp=b;x.restore();return;}x.lineCap='round';x.lineJoin='round';x.lineWidth=size;x.globalAlpha=opacity;x.strokeStyle=color;x.fillStyle=color;if(tool==='rainbow'){x.strokeStyle=x.fillStyle='hsl('+((Date.now()/8)%360)+',80%,60%)';}if(tool==='eraser')x.globalCompositeOperation='destination-out';if(tool==='mix'){
         x.restore();
-        var radius=Math.max(3,Math.round(size/2)),distance=Math.hypot(b.x-a.x,b.y-a.y),steps=Math.max(1,Math.ceil(distance/Math.max(2,radius*.5)));
+        var radius=Math.max(10,Math.round(size)),distance=Math.hypot(b.x-a.x,b.y-a.y),steps=Math.max(1,Math.ceil(distance/Math.max(2,radius*.5)));
         for(var step=1;step<=steps;step++)mixAt(x,a.x+(b.x-a.x)*step/steps,a.y+(b.y-a.y)*step/steps,radius);
         return;
       }
 
-      if(tool==='blur'||tool==='smudge'){var rad=Math.max(5,Math.round(size)),sx=Math.max(0,Math.floor(b.x-rad)),sy=Math.max(0,Math.floor(b.y-rad)),w=Math.min(WIDTH-sx,rad*2),h=Math.min(HEIGHT-sy,rad*2);if(w>0&&h>0){x.beginPath();x.arc(b.x,b.y,rad,0,Math.PI*2);x.clip();var patch=canvas(w,h);patch.getContext('2d').drawImage(current().canvas,sx,sy,w,h,0,0,w,h);if(tool==='blur'){var small=canvas(Math.max(1,Math.floor(w/5)),Math.max(1,Math.floor(h/5)));small.getContext('2d').drawImage(patch,0,0,small.width,small.height);x.globalAlpha=.4;x.drawImage(small,0,0,small.width,small.height,sx,sy,w,h);}else{x.globalAlpha=.35;x.drawImage(patch,sx+(b.x-a.x)*.5,sy+(b.y-a.y)*.5);}}}
+      if(tool==='blur'||tool==='smudge'){
+        var rad=Math.max(6,Math.round(size/2));
+        if(tool==='smudge'&&a.x===b.x&&a.y===b.y){x.restore();return;}
+        x.beginPath();x.arc(b.x,b.y,rad,0,Math.PI*2);x.clip();
+        if(tool==='blur'){
+          var patch=canvas(rad*2,rad*2),small=canvas(Math.max(2,Math.round(rad/4)),Math.max(2,Math.round(rad/4)));
+          patch.getContext('2d').drawImage(current().canvas,rad-b.x,rad-b.y);
+          small.getContext('2d').drawImage(patch,0,0,small.width,small.height);
+          x.globalAlpha=opacity*.8;
+          x.drawImage(small,b.x-rad,b.y-rad,rad*2,rad*2);
+        }else{
+          var pulled=canvas(rad*2,rad*2);
+          pulled.getContext('2d').drawImage(current().canvas,rad-a.x,rad-a.y);
+          x.globalAlpha=opacity*.75;
+          x.drawImage(pulled,b.x-rad,b.y-rad);
+        }
+      }
       else {x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke();if(a.x===b.x&&a.y===b.y){x.beginPath();x.arc(b.x,b.y,size/2,0,Math.PI*2);x.fill();}}x.restore();}
+    // A painter's hue wheel brings yellow and blue through green, with a darker mixed pigment.
+    var screenHue=[0,30,60,120,180,240,270,300,360],paintHue=[0,30,60,145,185,225,295,325,360];
+    function mapHue(h,from,to){
+      for(var i=1;i<from.length;i++)if(h<=from[i])return to[i-1]+(h-from[i-1])/(from[i]-from[i-1])*(to[i]-to[i-1]);
+      return 0;
+    }
+    function pigment(r,g,b){
+      r/=255;g/=255;b/=255;
+      var hi=Math.max(r,g,b),lo=Math.min(r,g,b),d=hi-lo,l=(hi+lo)/2,h=0;
+      if(d)h=hi===r?(g-b)/d:hi===g?(b-r)/d+2:(r-g)/d+4;
+      return [mapHue((h*60+360)%360,screenHue,paintHue)*Math.PI/180,d?d/(1-Math.abs(2*l-1)):0,l];
+    }
+    function pigmentRgb(angle,s,l){
+      var h=mapHue((angle*180/Math.PI+360)%360,paintHue,screenHue)/60,c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs(h%2-1)),m=l-c/2;
+      return [[c,x,0],[x,c,0],[0,c,x],[0,x,c],[x,0,c],[c,0,x]][Math.floor(h)].map(function(v){return (v+m)*255;});
+    }
     function mixAt(ctx,cx,cy,r){
       var left=Math.max(0,Math.floor(cx-r)),top=Math.max(0,Math.floor(cy-r)),w=Math.min(WIDTH-left,2*r+1),h=Math.min(HEIGHT-top,2*r+1);
       if(w<1||h<1)return;
-      var src=mixSource.getImageData(left,top,w,h).data,patch=ctx.getImageData(left,top,w,h),dst=patch.data,sum=[0,0,0],weight=0;
-      for(var i=0;i<src.length;i+=4){
-        var d=Math.hypot(left+(i/4)%w-cx,top+Math.floor(i/(4*w))-cy)/r;
-        if(d>=1||!src[i+3])continue;
-        var alpha=src[i+3]*(1-d*.6);weight+=alpha;
-        for(var c=0;c<3;c++)sum[c]+=src[i+c]*alpha;
-      }
-      if(!weight)return;
+      var patch=ctx.getImageData(left,top,w,h),dst=patch.data,stride=Math.max(1,Math.floor(r/6)),xx=0,yy=0,sat=0,light=0,weight=0,first=null,varied=false;
+      mixSource.forEach(function(source){
+        var src=source.ctx.getImageData(left,top,w,h).data;
+        for(var y=0;y<h;y+=stride)for(var x=0;x<w;x+=stride){
+          var i=(y*w+x)*4,d=Math.hypot(left+x-cx,top+y-cy)/r;
+          if(d>=1||!src[i+3])continue;
+          var rgb=[src[i],src[i+1],src[i+2]];
+          if(!first)first=rgb;
+          else if(Math.max(Math.abs(rgb[0]-first[0]),Math.abs(rgb[1]-first[1]),Math.abs(rgb[2]-first[2]))>12)varied=true;
+          var p=pigment(rgb[0],rgb[1],rgb[2]),a=src[i+3]*source.opacity*(1-d*.55);
+          xx+=Math.cos(p[0])*p[1]*a;yy+=Math.sin(p[0])*p[1]*a;sat+=p[1]*a;light+=p[2]*a;weight+=a;
+        }
+      });
+      if(!weight||!varied)return;
+      var coherence=sat?Math.min(1,Math.hypot(xx,yy)/sat):0;
+      var mixed=pigmentRgb(Math.atan2(yy,xx),sat/weight*Math.min(1,coherence*4),light/weight*(.75+.25*coherence));
       for(var j=0;j<dst.length;j+=4){
         if(!dst[j+3])continue;
-        var strength=Math.max(0,1-Math.hypot(left+(j/4)%w-cx,top+Math.floor(j/(4*w))-cy)/r)*opacity;
-        for(var k=0;k<3;k++)dst[j+k]+=(sum[k]/weight-dst[j+k])*strength;
+        var distance=Math.hypot(left+(j/4)%w-cx,top+Math.floor(j/(4*w))-cy)/r;
+        var strength=Math.min(1,Math.max(0,(1-distance)*2))*opacity;
+        for(var k=0;k<3;k++)dst[j+k]+=(mixed[k]-dst[j+k])*strength;
       }
       ctx.putImageData(patch,left,top);
     }
@@ -63,13 +104,35 @@
       while(head<tail){var i=queue[head++],j=i*4;data[j]=rgb[0];data[j+1]=rgb[1];data[j+2]=rgb[2];data[j+3]=Math.round(opacity*255);if(i%WIDTH)visit(i-1);if(i%WIDTH<WIDTH-1)visit(i+1);if(i>=WIDTH)visit(i-WIDTH);if(i<WIDTH*(HEIGHT-1))visit(i+WIDTH);}x.putImageData(dest,0,0);
     }
     function gestureState(){var a=Object.keys(pointers).map(function(k){return pointers[k];});if(a.length<2)return null;return{x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2,d:Math.max(1,Math.hypot(a[1].x-a[0].x,a[1].y-a[0].y)),a:Math.atan2(a[1].y-a[0].y,a[1].x-a[0].x)};}
-    view.addEventListener('pointerdown',function(e){if(!ready||busy)return;e.preventDefault();pointers[e.pointerId]={x:e.clientX,y:e.clientY};try{view.setPointerCapture(e.pointerId);}catch(ignore){}if(Object.keys(pointers).length===2){if(pointer&&pointer.drawing&&history.length){var original=history.pop();layers=original.layers;active=original.active;}pointer=null;var g=gestureState();gesture={start:g,zoom:zoom,angle:angle,pan:{x:pan.x,y:pan.y}};render();return;}if(gesture)return;var p=point(e);if(tool==='pan'){pointer={id:e.pointerId,p:p,screen:{x:e.clientX,y:e.clientY},pan:{x:pan.x,y:pan.y}};return;}if(!inside(p)||!current().visible){note('えがくレイヤーの目をひらいてね');return;}if(tool==='select'){if(floating){pointer={id:e.pointerId,p:p,moving:true};return;}commitSelection();remember();selection={x:p.x,y:p.y,w:0,h:0};pointer={id:e.pointerId,p:p,start:p,selecting:true};return;}commitSelection();remember();pointer={id:e.pointerId,p:p,drawing:true};lastStamp=null;mixSource=tool==='mix'?composite(true).getContext('2d'):null;if(tool==='bucket')bucket(p);else brush(p,p);render();});
+    view.addEventListener('pointerdown',function(e){if(!ready||busy)return;e.preventDefault();pointers[e.pointerId]={x:e.clientX,y:e.clientY};try{view.setPointerCapture(e.pointerId);}catch(ignore){}if(Object.keys(pointers).length===2){if(pointer&&pointer.drawing&&history.length){var original=history.pop();layers=original.layers;active=original.active;}pointer=null;var g=gestureState();gesture={start:g,zoom:zoom,angle:angle,pan:{x:pan.x,y:pan.y}};render();return;}if(gesture)return;var p=point(e);if(tool==='pan'){pointer={id:e.pointerId,p:p,screen:{x:e.clientX,y:e.clientY},pan:{x:pan.x,y:pan.y}};return;}if(!inside(p)||!current().visible){note('えがくレイヤーの目をひらいてね');return;}if(tool==='select'){if(floating){pointer={id:e.pointerId,p:p,moving:true};return;}commitSelection();remember();selection={x:p.x,y:p.y,w:0,h:0};pointer={id:e.pointerId,p:p,start:p,selecting:true};return;}commitSelection();remember();pointer={id:e.pointerId,p:p,drawing:true};lastStamp=null;mixSource=tool==='mix'?layers.filter(function(l){return l.visible&&l.opacity>0;}).map(function(l){var copy=l===current()?canvas():l.canvas;if(l===current())copy.getContext('2d').drawImage(l.canvas,0,0);return {ctx:copy.getContext('2d'),opacity:l.opacity};}):null;if(tool==='bucket')bucket(p);else brush(p,p);render();});
     view.addEventListener('pointermove',function(e){if(pointers[e.pointerId])pointers[e.pointerId]={x:e.clientX,y:e.clientY};if(gesture){var g=gestureState();if(!g)return;zoom=Math.max(.35,Math.min(5,gesture.zoom*g.d/gesture.start.d));angle=gesture.angle+g.a-gesture.start.a;pan.x=gesture.pan.x+g.x-gesture.start.x;pan.y=gesture.pan.y+g.y-gesture.start.y;render();return;}if(!pointer||pointer.id!==e.pointerId)return;var p=point(e);if(tool==='pan'){pan.x=pointer.pan.x+e.clientX-pointer.screen.x;pan.y=pointer.pan.y+e.clientY-pointer.screen.y;}else if(pointer.selecting){selection={x:Math.max(0,Math.min(pointer.start.x,p.x)),y:Math.max(0,Math.min(pointer.start.y,p.y)),w:Math.min(WIDTH,Math.max(pointer.start.x,p.x))-Math.max(0,Math.min(pointer.start.x,p.x)),h:Math.min(HEIGHT,Math.max(pointer.start.y,p.y))-Math.max(0,Math.min(pointer.start.y,p.y))};}else if(pointer.moving&&floating){floating.x+=p.x-pointer.p.x;floating.y+=p.y-pointer.p.y;selection.x=floating.x;selection.y=floating.y;}else if(pointer.drawing&&tool!=='bucket'){var smooth={x:pointer.p.x+(p.x-pointer.p.x)*.65,y:pointer.p.y+(p.y-pointer.p.y)*.65};brush(pointer.p,smooth);p=smooth;}pointer.p=p;render();});
     function end(e){delete pointers[e.pointerId];if(gesture){if(!Object.keys(pointers).length){gesture=null;changed();}return;}if(!pointer||pointer.id!==e.pointerId)return;if(pointer.selecting){lift();note('選んだ絵をドラッグ。選択どうぐで大きさ・回転を変えられます');}var edited=pointer.drawing||pointer.moving;pointer=null;mixSource=null;if(edited){changed();}else render();}
     view.addEventListener('pointerup',end);view.addEventListener('pointercancel',end);view.addEventListener('lostpointercapture',end);
     var toolLabel=document.createElement('strong');toolLabel.className='studio-active-tool';toolLabel.textContent='✏ ペン 選択中';toolbar.before(toolLabel);
-    var toolButtons={};[['pen','✏ ペン'],['eraser','▱ けす'],['bucket','▣ バケツ'],['select','▧ えらぶ'],['pan','✋ うごかす'],['blur','◌ ぼかす'],['smudge','〰 のばす'],['mix','◐ いろをまぜる']].forEach(function(t){var b=button(t[1],function(){commitSelection();tool=t[0];Object.keys(toolButtons).forEach(function(k){toolButtons[k].setAttribute('aria-pressed',k===tool?'true':'false');});toolLabel.textContent=t[1]+' 選択中';note(t[1]+' · ２本指で拡大・回転できます');render();});b.dataset.tool=t[0];b.setAttribute('aria-pressed',t[0]===tool?'true':'false');toolbar.appendChild(b);toolButtons[t[0]]=b;});
-    function extraTool(id,label){var b=button(label,function(){commitSelection();tool=id;Object.keys(toolButtons).forEach(function(k){toolButtons[k].setAttribute('aria-pressed',k===tool?'true':'false');});toolLabel.textContent=label+' 選択中';note(label);});toolButtons[id]=b;b.setAttribute('aria-pressed','false');side.appendChild(b);return b;}
+    var toolExample=document.createElement('canvas');toolExample.width=178;toolExample.height=25;toolExample.style.cssText='max-width:100%;display:block;visibility:hidden';
+    toolLabel.after(toolExample);
+    var toolHint={blur:'線のふちをやわらかく',smudge:'色から外へ引っぱる',mix:'2色の境目をなぞる'};
+    function explainTool(label){
+      var hint=toolHint[tool];toolLabel.textContent=label+(hint?' · '+hint:' 選択中');
+      toolExample.style.visibility=hint?'visible':'hidden';
+      if(!hint)return;
+      var x=toolExample.getContext('2d');x.clearRect(0,0,178,25);
+      x.fillStyle='#f04b68';x.fillRect(3,4,32,17);
+      if(tool==='mix'){x.fillStyle='#405bea';x.fillRect(35,4,32,17);}
+      x.font='17px sans-serif';x.fillStyle='#54707a';x.fillText('→',78,19);
+      if(tool==='blur'){
+        var soft=x.createLinearGradient(104,0,159,0);
+        soft.addColorStop(0,'rgba(240,75,104,0)');soft.addColorStop(.35,'#f04b68');soft.addColorStop(.65,'#f04b68');soft.addColorStop(1,'rgba(240,75,104,0)');
+        x.fillStyle=soft;x.fillRect(104,4,55,17);
+      }else if(tool==='smudge'){
+        x.fillStyle='#f04b68';x.beginPath();x.moveTo(104,4);x.lineTo(130,4);x.lineTo(172,12);x.lineTo(130,21);x.lineTo(104,21);x.fill();
+      }else{
+        x.fillStyle='#f04b68';x.fillRect(104,4,17,17);x.fillStyle='#9346b6';x.fillRect(121,4,30,17);x.fillStyle='#405bea';x.fillRect(151,4,17,17);
+      }
+      toolExample.setAttribute('aria-label',hint+'の見本');
+    }
+    var toolButtons={};[['pen','✏ ペン'],['eraser','▱ けす'],['bucket','▣ バケツ'],['select','▧ えらぶ'],['pan','✋ うごかす'],['blur','◌ ぼかす'],['smudge','〰 のばす'],['mix','◐ いろをまぜる']].forEach(function(t){var b=button(t[1],function(){commitSelection();tool=t[0];Object.keys(toolButtons).forEach(function(k){toolButtons[k].setAttribute('aria-pressed',k===tool?'true':'false');});explainTool(t[1]);note(toolHint[tool]||'２本指で拡大・回転できます');render();});b.dataset.tool=t[0];b.setAttribute('aria-pressed',t[0]===tool?'true':'false');toolbar.appendChild(b);toolButtons[t[0]]=b;});
+    function extraTool(id,label){var b=button(label,function(){commitSelection();tool=id;Object.keys(toolButtons).forEach(function(k){toolButtons[k].setAttribute('aria-pressed',k===tool?'true':'false');});explainTool(label);note(label);});toolButtons[id]=b;b.setAttribute('aria-pressed','false');side.appendChild(b);return b;}
     extraTool('rainbow','🌈 にじいろペン');extraTool('stamp','★ スタンプ');
     var stamps=document.createElement('details'),summary=document.createElement('summary');summary.textContent='スタンプをえらぶ';stamps.appendChild(summary);Array.from('🐶🐱🐭🐰🦊🐻🐼🐸🐵🐥🦁🐮🐷🐨🦄🐟🐬🐙🦋🐞🦖🦕🌸🌷🌻🍀🌈⭐🌙☀️☁️⛄❄️🔥🍎🍌🍓🍉🍦🍩🍰🍭🚗🚌🚒🚂✈️🚀⛵⚽🏀🎈🎁🎀🎵🎹🥁👑💎💖✨😀😆😍😺🤖👻').forEach(function(ch){stamps.appendChild(button(ch,function(){stamp=ch;toolButtons.stamp.click();}));});side.appendChild(stamps);
     var colorInput=document.createElement('input');colorInput.type='color';colorInput.value=color;colorInput.setAttribute('aria-label','いろ');colorInput.addEventListener('input',function(){color=colorInput.value;});toolbar.appendChild(colorInput);
@@ -92,12 +155,32 @@
     document.getElementById('oe-undo').addEventListener('click',function(){if(!history.length||busy)return;commitSelection();future.push(snapshot());restore(history.pop());});
     document.getElementById('oe-clear').textContent='＋ あたらしい絵';document.getElementById('oe-clear').addEventListener('click',function(){if(!ready||busy)return;saveDraft().then(function(){confirmDialog('新しい絵をはじめる？','今の絵を作品として保存してから、新しい紙をひらきます。',function(){return saveWork().then(function(){history=[];future=[];layers=[layer('背景'),layer('色'),layer('線')];active=2;artId=null;cardMeta=null;zoom=1;angle=0;pan={x:0,y:0};layerUI();changed();});});}).catch(function(){note('保存できないため、新しい絵に切り替えません');});});
     document.getElementById('oe-save').addEventListener('click',function(){saveWork().then(function(){note('✓ さくひんてんに保存しました');}).catch(function(e){note(e.message);});});
-    var cardBtn=button('▣ カードにする',function(){if(!ready||busy)return;commitSelection();saveDraft().then(function(){editCard();}).catch(function(e){note(e.message);});});cardBtn.className='studio-primary';document.getElementById('oe-save').after(cardBtn);
+    var cardGlowTimer;
+    function queueCardGlow(){
+      clearTimeout(cardGlowTimer);
+      cardBtn.classList.remove('studio-card-ready');
+      if(cardMeta)return;
+      cardGlowTimer=setTimeout(function(){
+        if(!ready||busy||pointer||gesture||cur!=='oekaki')return;
+        var sample=canvas(48,36),ctx=sample.getContext('2d'),pixels=0;
+        layers.forEach(function(l){if(l.visible&&l.opacity>0){ctx.globalAlpha=l.opacity;ctx.drawImage(l.canvas,0,0,48,36);}});
+        var data=ctx.getImageData(0,0,48,36).data;
+        for(var i=3;i<data.length;i+=4)if(data[i]>=32&&++pixels>=8){
+          cardBtn.classList.add('studio-card-ready');break;
+        }
+      },1600);
+    }
+    view.addEventListener('pointerdown',function(){
+      clearTimeout(cardGlowTimer);cardBtn.classList.remove('studio-card-ready');
+    });
+    view.addEventListener('pointerup',queueCardGlow);
+    view.addEventListener('pointercancel',queueCardGlow);
+    var cardBtn=button('▣ カードにする',function(){if(!ready||busy)return;clearTimeout(cardGlowTimer);cardBtn.classList.remove('studio-card-ready');commitSelection();saveDraft().then(function(){editCard();}).catch(function(e){note(e.message);});});cardBtn.className='studio-primary';document.getElementById('oe-save').after(cardBtn);
     var bookBtn=button('▦ カードちょう',openBook);document.querySelector('#scr-oekaki .topbar .spacer').before(bookBtn);
     function saveWork(meta){workChain=workChain.catch(function(){}).then(function(){if(!ready)throw new Error('読み込み中です');commitSelection();var p=pack(),c=composite(),img=c.toDataURL('image/png');p.card=meta===undefined?cardMeta:meta;return (p.card&&!p.card.number?ASOBI_BACKUP.nextCardNumber().then(function(n){p.card.number=n;}):Promise.resolve()).then(function(){var id=artId||Date.now()+'-'+Math.floor(Math.random()*1000000),row={id:id,at:Date.now(),kind:'free',title:p.card?p.card.name:'じゆうおえかき',img:img,payload:p};return window.ASOBI_BACKUP.putWork(row).then(function(){artId=id;cardMeta=p.card;revision++;return saveDraft();}).then(function(){return row;});});});return workChain;}
     function dialog(title){var ov=document.createElement('div');ov.className='studio-overlay';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label',title);var box=document.createElement('section');box.className='studio-dialog';var head=document.createElement('header'),h=document.createElement('h2');h.textContent=title;head.appendChild(h);var previous=document.activeElement;function close(){ov.remove();document.removeEventListener('keydown',key);if(previous&&previous.focus)previous.focus();}head.appendChild(button('× とじる',close));box.appendChild(head);ov.appendChild(box);document.body.appendChild(ov);function key(e){if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();close();}if(e.key==='Tab'){var a=Array.prototype.slice.call(box.querySelectorAll('button,input,textarea,select')).filter(function(x){return !x.disabled;});if(!a.length)return;if(e.shiftKey&&document.activeElement===a[0]){a[a.length-1].focus();e.preventDefault();}else if(!e.shiftKey&&document.activeElement===a[a.length-1]){a[0].focus();e.preventDefault();}}}document.addEventListener('keydown',key);head.querySelector('button').focus();return{box:box,close:close,overlay:ov};}
     function confirmDialog(title,text,fn,confirmLabel){var d=dialog(title),p=document.createElement('p');p.textContent=text;d.box.appendChild(p);var yes=button(confirmLabel||'保存して はじめる',function(){yes.disabled=true;Promise.resolve().then(fn).then(d.close).catch(function(e){p.textContent=e.message;yes.disabled=false;});});d.box.appendChild(yes);}
-    function editCard(){var d=dialog('じぶんの カードをつくる'),preview=document.createElement('img');preview.src=composite().toDataURL();preview.className='studio-card-preview';d.box.appendChild(preview);function field(label,tag,max,value){var l=document.createElement('label');l.textContent=label;var e=document.createElement(tag);e.maxLength=max;e.value=value||'';l.appendChild(e);d.box.appendChild(l);return e;}var name=field('なまえ（あとでもOK）','input',40,cardMeta&&cardMeta.name),description=field('どんなもの？','textarea',180,cardMeta&&cardMeta.description),frame=document.createElement('select');frame.setAttribute('aria-label','カードのわく');[['berry','いちご'],['sky','ほしぞら'],['rainbow','にじ']].forEach(function(a){var o=document.createElement('option');o.value=a[0];o.textContent=a[1];frame.appendChild(o);});frame.value=cardMeta?cardMeta.frame:'berry';d.box.appendChild(frame);var message=document.createElement('p');message.textContent='名前はあとから変えられます。絵はそのまま残ります。';d.box.appendChild(message);var save=button('✓ カードちょうに しまう',function(){save.disabled=true;saveWork({name:name.value.trim()||'ななしのカード',description:description.value.trim(),frame:frame.value,number:cardMeta&&cardMeta.number,createdAt:cardMeta&&cardMeta.createdAt||Date.now()}).then(function(){d.close();openBook();note('✓ カードができた！');}).catch(function(e){message.textContent=e.message;save.disabled=false;});});d.box.appendChild(save);}
+    function editCard(){var d=dialog('じぶんの カードをつくる'),preview=document.createElement('img');preview.src=composite().toDataURL();preview.className='studio-card-preview';d.box.appendChild(preview);function field(label,tag,max,value){var l=document.createElement('label');l.textContent=label;var e=document.createElement(tag);e.maxLength=max;e.value=value||'';l.appendChild(e);d.box.appendChild(l);return e;}var name=field('なまえ（あとでもOK）','input',40,cardMeta&&cardMeta.name),description=field('どんなもの？','textarea',180,cardMeta&&cardMeta.description),frame=document.createElement('select');frame.setAttribute('aria-label','カードのわく');var frames=[['berry','いちご'],['sky','ほしぞら'],['rainbow','にじ']];[['auto','🎲 おまかせ']].concat(frames).forEach(function(a){var o=document.createElement('option');o.value=a[0];o.textContent=a[1];frame.appendChild(o);});frame.value=cardMeta?cardMeta.frame:'auto';d.box.appendChild(frame);var message=document.createElement('p');message.textContent='名前はあとから変えられます。絵はそのまま残ります。';d.box.appendChild(message);var save=button('✓ カードちょうに しまう',function(){save.disabled=true;saveWork({name:name.value.trim()||'ななしのカード',description:description.value.trim(),frame:frame.value==='auto'?frames[Math.floor(Math.random()*frames.length)][0]:frame.value,number:cardMeta&&cardMeta.number,createdAt:cardMeta&&cardMeta.createdAt||Date.now()}).then(function(row){d.close();celebrateCard(row);note('✓ カードができた！');}).catch(function(e){message.textContent=e.message;save.disabled=false;});});d.box.appendChild(save);}
     var examples=[{name:'いちごドラゴン',description:'いちごをたべると、ピンクのひをはく。',frame:'berry',sample:0},{name:'そらとぶおうち',description:'よるになると、おつきさまへあそびにいく。',frame:'sky',sample:1},{name:'にじジュース',description:'のむと、すきないろのくもにのれる。',frame:'rainbow',sample:2}];
     function sampleArt(i){var c=canvas(),x=c.getContext('2d');x.fillStyle=['#fff3df','#e9f5ff','#fff5f5'][i];x.fillRect(0,0,WIDTH,HEIGHT);x.lineWidth=9;x.lineJoin='round';x.lineCap='round';function shape(points,fill){x.beginPath();points.forEach(function(p,j){if(j)x.lineTo(p[0],p[1]);else x.moveTo(p[0],p[1]);});x.closePath();x.fillStyle=fill;x.fill();x.strokeStyle='#654d65';x.stroke();}function oval(px,py,rx,ry,fill){x.beginPath();x.ellipse(px,py,rx,ry,.03,0,Math.PI*2);x.fillStyle=fill;x.fill();x.strokeStyle='#654d65';x.stroke();}
       if(i===0){shape([[343,440],[215,295],[398,350]],'#ffb5ad');shape([[590,402],[714,245],[690,473]],'#ffb5ad');oval(510,480,175,146,'#ee6e80');oval(620,300,123,109,'#ef7786');shape([[555,220],[570,139],[613,202]],'#f5c24d');shape([[665,203],[721,151],[710,246]],'#f5c24d');shape([[367,501],[217,565],[398,565]],'#ef7786');oval(472,496,83,105,'#ffd8a8');oval(575,606,52,25,'#ef7786');oval(425,604,52,24,'#ef7786');oval(584,286,10,14,'#3e3546');oval(665,283,10,14,'#3e3546');x.beginPath();x.arc(626,312,32,.1,Math.PI-.1);x.stroke();shape([[761,326],[812,285],[806,339],[863,320],[822,378]],'#ff98c2');}
@@ -105,7 +188,41 @@
       if(i===2){shape([[374,287],[632,290],[601,624],[404,621]],'#fff');var cs=['#ef7e99','#f7b95d','#e5d574','#8acba7','#7abadd','#b699d5'];cs.forEach(function(cl,j){x.fillStyle=cl;x.fillRect(414+j*2,318+j*46,180-j*4,48);});shape([[414,621],[601,624],[630,291],[374,287]],'rgba(255,255,255,.13)');x.strokeStyle='#67b6b1';x.lineWidth=21;x.beginPath();x.moveTo(541,417);x.lineTo(594,190);x.lineTo(692,156);x.stroke();oval(367,291,69,69,'#ffbb70');x.strokeStyle='#fff';x.lineWidth=8;x.beginPath();x.moveTo(349,249);x.lineTo(385,328);x.moveTo(326,294);x.lineTo(411,287);x.stroke();}
       x.fillStyle='#9c8ba2';x.font='28px sans-serif';x.fillText('じぶんの せかいを かいてみよう',50,710);return c.toDataURL('image/png');}
     var sampleImages=null;
-    function drawCard(row,number){var m=row.payload.card,c=canvas(600,850),x=c.getContext('2d'),pal={berry:['#5e163f','#c95777'],sky:['#142747','#416caa'],rainbow:['#143f42','#378a80']},cs=pal[m.frame]||pal.berry,g=x.createLinearGradient(0,0,600,850);g.addColorStop(0,'#fbdf8c');g.addColorStop(.18,cs[1]);g.addColorStop(.48,cs[0]);g.addColorStop(.84,cs[1]);g.addColorStop(1,'#e6bc61');x.fillStyle=g;x.fillRect(0,0,600,850);x.lineWidth=5;x.strokeStyle='#e7c974';x.strokeRect(13,13,574,824);x.strokeStyle='#fff0b1';x.lineWidth=2;x.strokeRect(25,25,550,800);x.fillStyle=cs[0];x.fillRect(34,35,532,84);x.fillStyle='#fff1c8';x.font='bold 30px sans-serif';var title=m.name;while(x.measureText(title).width>465&&title.length>1)title=title.slice(0,-1);x.fillText(title,49,82);x.font='16px sans-serif';x.fillText('ORIGINAL ART  /  '+(number||'MY COLLECTION'),49,108);for(var i=0;i<5;i++){x.fillStyle='#f6d673';x.beginPath();x.arc(450+i*22,137,7,0,Math.PI*2);x.fill();}return image(row.img).then(function(im){x.fillStyle='#d3b566';x.fillRect(32,155,536,404);x.fillStyle='#fff';x.fillRect(39,162,522,390);x.drawImage(im,39,162,522,390);x.fillStyle='#fbf1d4';x.fillRect(34,578,532,188);x.strokeStyle='#d5b45d';x.lineWidth=3;x.strokeRect(34,578,532,188);x.fillStyle='#4b3540';x.font='bold 19px sans-serif';x.fillText('じぶんだけのものがたり',50,610);x.font='21px sans-serif';var text=m.description||'まだ ひみつの カード',line='',y=646;Array.from(text).forEach(function(ch){if(ch==='\n'||x.measureText(line+ch).width>495){if(y<=742)x.fillText(line,50,y);line=ch==='\n'?'':ch;y+=25;}else line+=ch;});if(line&&y<=742)x.fillText(line,50,y);x.fillStyle='#fff2bf';x.font='17px sans-serif';x.fillText('ASOBI  •  ARTIST COLLECTION',38,800);x.textAlign='right';x.fillText('✦ '+String(m.number||number||1),560,800);return c;});}
+    function celebrateCard(row){
+      var d=dialog('カードができた！'),stage=document.createElement('div');
+      d.box.classList.add('studio-reveal-dialog');stage.className='studio-reveal-stage';
+      var art=document.createElement('img');art.src=row.img;art.alt='';art.className='studio-reveal-art';
+      var card=document.createElement('img');card.alt=row.payload.card.name;card.className='studio-reveal-card';
+      stage.appendChild(art);stage.appendChild(card);d.box.appendChild(stage);
+      d.box.appendChild(button('カードちょうへ',function(){d.close();openBook();}));
+      drawCard(row,'No. '+String(row.payload.card.number).padStart(3,'0')).then(function(c){
+        card.onload=function(){stage.classList.add('studio-reveal-playing');};
+        card.src=c.toDataURL('image/png');
+      }).catch(function(){art.alt=row.payload.card.name;});
+    }
+    var cardTrim;
+    function drawCard(row,number){var m=row.payload.card,c=canvas(600,850),x=c.getContext('2d'),pal={berry:['#5e163f','#c95777'],sky:['#142747','#416caa'],rainbow:['#143f42','#378a80']},cs=pal[m.frame]||pal.berry,g=x.createLinearGradient(0,0,600,850);g.addColorStop(0,'#fbdf8c');g.addColorStop(.18,cs[1]);g.addColorStop(.48,cs[0]);g.addColorStop(.84,cs[1]);g.addColorStop(1,'#e6bc61');x.fillStyle=g;x.fillRect(0,0,600,850);
+      x.save();x.globalAlpha=.18;
+      for(var band=-850;band<600;band+=46){
+        x.fillStyle=band%3===0?'#fff5ad':'#fff';
+        x.beginPath();x.moveTo(band,850);x.lineTo(band+17,850);x.lineTo(band+867,0);x.lineTo(band+850,0);x.fill();
+      }
+      x.restore();
+      var gold=x.createLinearGradient(0,0,580,850);
+      gold.addColorStop(0,'#83501a');gold.addColorStop(.26,'#fff5ac');gold.addColorStop(.53,'#b97926');gold.addColorStop(.74,'#fff1a6');gold.addColorStop(1,'#96601e');
+      x.strokeStyle=gold;x.lineWidth=12;x.strokeRect(7,7,586,836);
+      [25,575].forEach(function(px){[25,825].forEach(function(py){x.save();x.translate(px,py);x.rotate(Math.PI/4);x.fillStyle=gold;x.fillRect(-10,-10,20,20);x.restore();});});
+x.lineWidth=5;x.strokeStyle='#e7c974';x.strokeRect(13,13,574,824);x.strokeStyle='#fff0b1';x.lineWidth=2;x.strokeRect(25,25,550,800);x.fillStyle=cs[0];x.fillRect(34,35,532,84);x.fillStyle='#fff1c8';x.font='bold 30px sans-serif';var title=m.name;while(x.measureText(title).width>465&&title.length>1)title=title.slice(0,-1);x.fillText(title,49,82);x.font='16px sans-serif';x.fillText('ORIGINAL ART  /  '+(number||'MY COLLECTION'),49,108);for(var i=0;i<5;i++){x.fillStyle='#f6d673';x.beginPath();x.arc(450+i*22,137,7,0,Math.PI*2);x.fill();}return image(row.img).then(function(im){x.fillStyle=gold;x.fillRect(32,155,536,404);x.fillStyle='#fff';x.fillRect(39,162,522,390);var fit=Math.min(522/im.width,390/im.height),iw=im.width*fit,ih=im.height*fit;x.drawImage(im,300-iw/2,357-ih/2,iw,ih);x.fillStyle='#fbf1d4';x.fillRect(34,578,532,188);x.strokeStyle='#d5b45d';x.lineWidth=3;x.strokeRect(34,578,532,188);x.fillStyle='#4b3540';x.font='bold 19px sans-serif';x.fillText('✦  じぶんだけのものがたり',50,610);x.fillStyle='#a07937';x.fillRect(50,622,500,2);x.fillStyle='#4b3540';x.font='21px sans-serif';var text=m.description||'まだ ひみつの カード',line='',y=646;Array.from(text).forEach(function(ch){if(ch==='\n'||x.measureText(line+ch).width>495){if(y<=742)x.fillText(line,50,y);line=ch==='\n'?'':ch;y+=25;}else line+=ch;});if(line&&y<=742)x.fillText(line,50,y);x.fillStyle='#fff2bf';x.font='17px sans-serif';x.fillText('ASOBI  •  ARTIST COLLECTION',38,800);x.textAlign='right';x.fillText('✦ '+String(m.number||number||1),560,800);
+      if(!cardTrim)cardTrim=image('studio-card-filigree.webp').catch(function(){return null;});
+      return cardTrim.then(function(trim){
+        if(trim){
+          // Keep the generated foil at the perimeter so it cannot cover the art or text.
+          x.save();x.beginPath();x.rect(0,0,600,850);x.rect(31,50,538,754);x.clip('evenodd');
+          x.drawImage(trim,0,0,600,850);x.restore();
+        }
+        return c;
+      });
+    });}
     function openBook(){if(!sampleImages)sampleImages=examples.map(function(e){return sampleArt(e.sample);});var d=dialog('カードちょう'),tabs=document.createElement('nav'),grid=document.createElement('div'),msg=document.createElement('p');grid.className='studio-book';d.box.classList.add('studio-book-dialog');d.box.appendChild(tabs);d.box.appendChild(msg);d.box.appendChild(grid);var page=0,rows=[],sample=false,loading=0;
       var prev=button('◀ まえ',function(){page=Math.max(0,page-1);paint();}),next=button('つぎ ▶',function(){page++;paint();});
       function paint(){grid.classList.remove('page-turn');void grid.offsetWidth;grid.classList.add('page-turn');grid.innerHTML='';var data=sample?examples.map(function(m,i){return{id:'sample-'+i,img:sampleImages[i],at:0,payload:{card:m}};}):rows;page=Math.min(page,Math.max(0,Math.ceil(data.length/6)-1));msg.textContent=sample?'おてほん３枚 · 自分の枚数には入りません':data.length+'まい · '+(page+1)+'ページ';prev.disabled=page===0;next.disabled=(page+1)*6>=data.length;if(!data.length){var empty=document.createElement('p');empty.textContent='さいしょの１まいを つくろう！';grid.appendChild(empty);}data.slice(page*6,page*6+6).forEach(function(row,j){var m=row.payload.card,b=button('',function(){detail(row,sample,page*6+j+1);});b.className='studio-card frame-'+m.frame;var im=document.createElement('img');im.alt=m.name;drawCard(row,'No. '+String(m.number||page*6+j+1).padStart(3,'0')).then(function(c){im.src=c.toDataURL('image/png');}).catch(function(){im.src=row.img;});var n=document.createElement('strong');n.textContent=m.name;var tag=document.createElement('small');tag.textContent=(sample?'おてほん':'No. '+String(m.number||page*6+j+1).padStart(3,'0'))+' · タップでひらく';b.appendChild(im);b.setAttribute('aria-label',m.name+'・カードを開く');b.appendChild(tag);grid.appendChild(b);});for(var slot=data.slice(page*6,page*6+6).length;slot<6;slot++){var pocket=document.createElement('div');pocket.className='studio-empty-pocket';pocket.textContent='◇';pocket.setAttribute('aria-label','空のカードポケット');grid.appendChild(pocket);}}
@@ -118,8 +235,8 @@
     side.appendChild(button('原画をPNGで保存',function(){commitSelection();composite().toBlob(function(b){ASOBI_BACKUP.download(b,'おえかき.png');},'image/png');}));
     side.appendChild(button('作品バックアップ',function(){note('作品をまとめています…');ASOBI_BACKUP.exportAll().then(function(ok){note(ok?'書き出しを開始しました。「ファイル」で確認してください':'書き出せませんでした。設定のメッセージを確認してください');});}));
     var input=document.createElement('input');input.type='file';input.accept='image/png,image/jpeg,image/webp';input.hidden=true;side.appendChild(input);side.appendChild(button('画像をレイヤーに追加',function(){if(layers.length>=6){note('レイヤーは６枚までです');return;}input.click();}));input.addEventListener('change',function(){var f=input.files[0];if(!f)return;if(f.size>12*1024*1024){note('画像は12MB以下にしてください');input.value='';return;}var url=URL.createObjectURL(f);image(url).then(function(im){commitSelection();remember();var l=layer('とりこみ');var s=Math.min(WIDTH/im.width,HEIGHT/im.height);l.canvas.getContext('2d').drawImage(im,(WIDTH-im.width*s)/2,(HEIGHT-im.height*s)/2,im.width*s,im.height*s);layers.push(l);active=layers.length-1;layerUI();changed();}).catch(function(){note('この画像は読み込めません');}).finally(function(){URL.revokeObjectURL(url);input.value='';});});
-    layers=[layer('背景'),layer('色'),layer('線')];active=2;busy=true;draftIO().then(function(p){if(p)return unpack(p);}).then(function(){ready=true;busy=false;layerUI();render();updateButtons();note('✓ ２本指で拡大・回転 · カードもつくれるよ');}).catch(function(){ready=true;busy=false;layerUI();render();note('前の下書きを読み込めません。バックアップを確認してください');});
+    layers=[layer('背景'),layer('色'),layer('線')];active=2;busy=true;draftIO().then(function(p){if(p)return unpack(p);}).then(function(){ready=true;busy=false;layerUI();render();updateButtons();queueCardGlow();note('✓ ２本指で拡大・回転 · カードもつくれるよ');}).catch(function(){ready=true;busy=false;layerUI();render();note('前の下書きを読み込めません。バックアップを確認してください');});
     document.addEventListener('visibilitychange',function(){if(document.hidden)saveDraft().catch(function(){});});window.addEventListener('pagehide',function(){saveDraft().catch(function(){});});
-    return {suspend:function(){ready=false;busy=true;clearTimeout(saveTimer);note('復元しました。アプリを開き直してください');},resize:render,leave:function(){pointer=null;pointers={};gesture=null;saveDraft().catch(function(){});},saveDraft:saveDraft,validate:validate,pack:pack,openBook:openBook};
+    return {suspend:function(){ready=false;busy=true;clearTimeout(saveTimer);note('復元しました。アプリを開き直してください');},resize:function(){render();queueCardGlow();},leave:function(){clearTimeout(cardGlowTimer);cardBtn.classList.remove('studio-card-ready');pointer=null;pointers={};gesture=null;saveDraft().catch(function(){});},saveDraft:saveDraft,validate:validate,pack:pack,openBook:openBook};
   };
 })();

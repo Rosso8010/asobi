@@ -20,10 +20,6 @@
 
 /* Preserve the square frame of each machine in the three-panel atlas. */
 .gacha-stage{width:min(380px,100%);height:auto;aspect-ratio:1}
-.gacha-custom-machine{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:24%;background:radial-gradient(circle at 50% 34%,#fff4bb 0 16%,#6dc3ae 17% 32%,#334771 33% 50%,#131d38 51%);border:4px solid #deae67}
-.theme-kanji .gacha-custom-machine{background:radial-gradient(circle at 50% 34%,#fff4bb 0 16%,#cc8374 17% 32%,#703657 33% 50%,#2e1e38 51%)}
-.gacha-custom-machine span{font:bold clamp(50px,12vw,95px) serif;color:#53293f}
-.gacha-custom-machine strong{color:#fff7ce;text-shadow:0 2px 5px #000}
 .gacha-stage.spinning::after,.gacha-stage.capsule-ready::after{content:'';position:absolute;inset:0;border-radius:22px;pointer-events:none;background:radial-gradient(circle,#fff6a900 32%,#ffe38988 100%);animation:gacha-glow .75s ease-in-out infinite alternate}
 .gacha-handle,.gacha-capsule{z-index:1}
 .capsule-reveal .exhibit-art{animation:prize-glow .85s ease-out}
@@ -39,4 +35,63 @@
 .capsule-opening::after{background:radial-gradient(circle at 50% 76%,#fff8ca 0%,#ffdd8470 29%,transparent 65%)}
 @keyframes capsule-open{0%{opacity:1;transform:scale(1)}55%{opacity:1;transform:rotate(-10deg) scale(1.22);filter:brightness(1.5)}100%{opacity:0;transform:scale(1.6);filter:brightness(2.8)}}
 @media(prefers-reduced-motion:reduce){.capsule-opening .gacha-capsule{animation:none}}
-.gacha-custom-machine strong{position:absolute;bottom:15%;left:0;right:0;text-align:center}
+
+.gacha-extra-machine{background-image:url('museum-machines-kanji-zodiac.webp');background-size:200% 100%}
+.theme-kanji .gacha-handle,.theme-zodiac .gacha-handle{top:calc(62% - 35px)}
+.theme-kanji .gacha-capsule,.theme-zodiac .gacha-capsule{bottom:5%}
+
+#scr-oekaki .studio-primary.studio-card-ready{
+  position:relative;overflow:visible;z-index:2;
+  color:#452005!important;background:linear-gradient(115deg,#ffb62e,#fff7a0 48%,#ffc144)!important;
+  border-color:#fff4a3!important;box-shadow:0 0 0 2px #d58320,0 0 18px 3px #ffd34b;
+  animation:studio-card-glow 1.4s ease-in-out 3;
+}
+#scr-oekaki .studio-card-ready::before{
+  content:'';pointer-events:none;position:absolute;top:100%;left:50%;width:88px;height:88px;
+  background:url('studio-card-sparkle.webp') center/contain no-repeat;
+  transform:translate(-50%,-5px);animation:studio-card-pop 2.4s ease-out both;
+}
+#scr-oekaki .studio-card-ready::after{
+  content:'✦';pointer-events:none;position:absolute;right:-9px;top:-12px;
+  color:#fff6ab;text-shadow:0 0 5px #924a00,0 0 9px #ffb52a;font-size:24px;
+  animation:studio-card-star .9s ease-in-out 3;
+}
+@keyframes studio-card-glow{
+  0%,100%{transform:scale(1);filter:brightness(1)}
+  45%{transform:scale(1.08);filter:brightness(1.18)}
+}
+@keyframes studio-card-pop{
+  from{opacity:0;transform:translate(-50%,-25px) rotate(-12deg) scale(.45)}
+  25%{opacity:1;transform:translate(-50%,-3px) rotate(3deg) scale(1.12)}
+  35%,85%{opacity:1;transform:translate(-50%,-5px)}
+  to{opacity:0;transform:translate(-50%,-5px)}
+}
+@keyframes studio-card-star{50%{transform:translate(6px,-5px) scale(1.35) rotate(30deg)}}
+@media(prefers-reduced-motion:reduce){
+  #scr-oekaki .studio-primary.studio-card-ready,
+  #scr-oekaki .studio-card-ready::before,
+  #scr-oekaki .studio-card-ready::after{animation:none}
+}
+
+.studio-reveal-dialog{text-align:center}
+.studio-reveal-stage{position:relative;display:grid;place-items:center;height:min(54vh,405px);margin:12px 0;overflow:hidden;perspective:900px;background:radial-gradient(ellipse,#644399,#15132d 72%);border-radius:16px}
+.studio-reveal-art,.studio-reveal-card{position:absolute;max-width:85%;max-height:88%;object-fit:contain;filter:drop-shadow(0 8px 12px #120b22)}
+.studio-reveal-card{opacity:0;border-radius:10px}
+.studio-reveal-playing .studio-reveal-art{animation:studio-art-in .85s ease-in both}
+.studio-reveal-playing .studio-reveal-card{animation:studio-card-spin 1.45s .68s cubic-bezier(.2,.7,.25,1) both}
+.studio-reveal-playing::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle,#fff8bd,transparent 65%);animation:studio-reveal-flare 1s .66s both}
+@keyframes studio-art-in{to{opacity:0;transform:scale(.12) rotate(-14deg)}}
+@keyframes studio-card-spin{from{opacity:0;transform:scale(.3) rotateY(-340deg)}28%{opacity:1}to{opacity:1;transform:scale(1) rotateY(0)}}
+@keyframes studio-reveal-flare{0%,100%{opacity:0}30%{opacity:.8}}
+@media(prefers-reduced-motion:reduce){
+ .studio-reveal-playing .studio-reveal-art,.studio-reveal-playing .studio-reveal-card,.studio-reveal-playing::after{animation:none}
+ .studio-reveal-playing .studio-reveal-art,.studio-reveal-playing::after{opacity:0}
+ .studio-reveal-playing .studio-reveal-card{opacity:1}
+}
+.studio-reveal-playing::before{content:'✦　✧　✦';position:absolute;z-index:1;top:15%;color:#fff3ac;font-size:clamp(22px,5vw,54px);text-shadow:0 0 10px #f3a437;pointer-events:none;animation:studio-reveal-stars 1.35s .72s both}
+@keyframes studio-reveal-stars{0%{opacity:0;transform:translateY(25px) scale(.4)}34%{opacity:1;transform:translateY(-6px) scale(1.1)}100%{opacity:0;transform:translateY(-24px) scale(1.2)}}
+@media(prefers-reduced-motion:reduce){.studio-reveal-playing::before{animation:none;display:none}}
+
+.studio-reveal-playing .studio-reveal-card{animation:studio-card-spin 1.45s .68s cubic-bezier(.2,.7,.25,1) both,studio-foil-shine .65s 2.16s ease-in-out}
+@keyframes studio-foil-shine{50%{filter:brightness(1.3) drop-shadow(0 0 14px #ffd375)}}
+@media(prefers-reduced-motion:reduce){.studio-reveal-playing .studio-reveal-card{animation:none}}
